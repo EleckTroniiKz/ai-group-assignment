@@ -12,28 +12,33 @@ import re
 
 corpus = []
 
-def clean_text(text_to_clean):
-    """ This method will receive a string, and returns the same string, cleaned of any syntactical symbols like commas, parentheses, semicoli, ...
+def create_bag_of_words(rowText):
+    pass
+
+def text_to_word_list(text_to_clean):
+    """ This method will receive a string, and returns the same string as a list of words, cleaned of any syntactical symbols like commas, parentheses, semicoli, ...
     """
+
     # first remove line breaks in the text
-    string_without_linebreaks = text_to_clean.replace('\n', ' ')
+    string_without_linebreaks = text_to_clean.replace('\n', '')
     # then remove NON alphabetical and NON numerical values
-    cleaned_string = re.sub(r'[a-zA-Z0-9]', ' ', string_without_linebreaks)
-    return cleaned_string
+    cleaned_string = re.sub(r'[^a-zA-Z0-9]', ' ', string_without_linebreaks)
+    # replace double spaces and then turn to lowercase
+    cleaned_string = cleaned_string.replace('  ', ' ').lower()
+    return cleaned_string.split(" ")
 
 def read_document_text(path="./art_stories_examples.csv"):
     """ This method reads the data of a file which is a CSV, and has the content Semikolon(;) separated. 
         The columns are:  ContentType - Title - ShortDescriptionText - Text
     """
-    # CAN MACHT DIESE METHODE GRAD BIDDE NIT ANFASSEN :D
     # read file into the dataframe
     dataframe = pd.read_csv(path, sep=";")
-    for row in dataframe.iterrows():
-        print(row)
 
-    pass
-
-read_document_text()
+    # apply clean method on every cell
+    for column in ["ShortDescriptionText", "Text"]:
+        dataframe[column] = dataframe[column].apply(text_to_word_list)
+    
+    return dataframe
 
 def rank_art_stories_python_function(user_query_string):
     pass
