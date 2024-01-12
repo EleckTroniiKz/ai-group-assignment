@@ -7,11 +7,17 @@
     c)  Programmieren Sie einen Empfehlungsdienst für Art Stories durch Clustering mit Top2Vec.
 """
 
+corpus = []
+
 def read_document_text(path):
     document_lines = []
     with open(path, "r") as document:
         for line in document:
             document_lines.append(line)
+            words = line.split(" ")
+            for word in words:
+                if word not in corpus:
+                    corpus.append(word)
     document.close()
 
 
