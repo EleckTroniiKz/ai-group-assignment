@@ -38,12 +38,14 @@ def text_to_word_list(text_to_clean):
     """ This method will receive a string, and returns the same string as a list of words, cleaned of any syntactical symbols like commas, parentheses, semicoli, ...
     """
     # first remove line breaks in the text
-    string_without_linebreaks = text_to_clean.replace('\n', '')
+    string_without_linebreaks = text_to_clean.replace('\\n', ' ')
     # then remove NON alphabetical and NON numerical values
     cleaned_string = re.sub(r'[^a-zA-Z0-9]', ' ', string_without_linebreaks)
     # replace double spaces and then turn to lowercase
     cleaned_string = cleaned_string.replace('  ', ' ').lower()
-    return cleaned_string.split(" ")
+    # split the string into a list of words
+    listOfWords = cleaned_string.split(" ")
+    return listOfWords
 
 def read_document_text(path="./Aufgabe 1/art_stories_examples.csv"):
     """ This method reads the data of a file which is a CSV, and has the content Semikolon(;) separated. 
@@ -55,11 +57,10 @@ def read_document_text(path="./Aufgabe 1/art_stories_examples.csv"):
     # apply clean method on every cell
     # save every word to allWords list
     # create bag-of-words vector for each dataframe row / each document
-    for column in ["ShortDescriptionText", "Text"]:
+    for column in ["Title", "ShortDescriptionText", "Text"]:
         dataframe[column] = dataframe[column].apply(text_to_word_list)
         collectAllWords(dataframe[column][0])
         createBagOfWords(dataframe[column][0])
-
     return dataframe
 
 def rank_art_stories_python_function(user_query_string):
