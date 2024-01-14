@@ -26,7 +26,6 @@ def createBagOfWords(wordList):
         The new bag-of-words vector will be added to the global vectors list.
     """
     newVec = {}
-    print(wordList)
     for word in allWords:
         if word in wordList:
             newVec[word] = wordList.count(word)
@@ -60,8 +59,6 @@ def read_document_text(path="./Aufgabe 1/art_stories_examples.csv"):
         dataframe[column] = dataframe[column].apply(text_to_word_list)
         collectAllWords(dataframe[column][0])
         createBagOfWords(dataframe[column][0])
-    
-    print(len(list(vectors[0].keys())))
 
     return dataframe
 
