@@ -60,6 +60,8 @@ def read_document_text(path="./Aufgabe 1/art_stories_examples.csv"):
     for column in ["Title", "ShortDescriptionText", "Text"]:
         dataframe[column] = dataframe[column].apply(text_to_word_list)
         collectAllWords(dataframe[column][0])
+
+    for column in ["Title", "ShortDescriptionText", "Text"]:
         createBagOfWords(dataframe[column][0])
     return dataframe
 
