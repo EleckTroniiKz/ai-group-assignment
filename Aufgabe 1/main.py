@@ -2,6 +2,8 @@ import pandas as pd
 import re
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from sklearn.feature_extraction.text import CountVectorizer
+from top2vec import Top2Vec
+
 
 """
     a)  Programmieren Sie eine Python-Funktion für das Ranking von Art Stories im 
@@ -101,7 +103,35 @@ def rank_art_stories_python_function(user_query_string):
 
 # c)
 def recommend_art_stories_python_function(identifier_of_visited_art_stories_list):
-    pass
+    """Based of the created clusters of the top2vec we search in 
+    which cluster the visited art stories where assigned and therefore 
+    recommend the top 3 similar documents (top 1 of each cluster)"""
+    
+    # Read the dataframe
+    dataframe = pd.read_csv('./Aufgabe 1/art_stories_examples.csv', delimiter=';')
 
-read_document_text()
-print(rank_art_stories_python_function("I like Paris a lot."))
+    # create the document for the Top2Vec clustering
+    documents = dataframe['Text'].tolist()
+    documents = documents * 10  # of course nonsense later expand the art stories csv
+
+    # create the top2vec model based on the art story document (art_stories_example.csv)
+    top2vec_model = Top2Vec(documents, embedding_model='universal-sentence-encoder', min_count=1, speed='fast-learn', workers=4)
+
+    # Get the clusters where the visited art stories where assigned to.
+    visited_vector_topics = top2vec_model.get_documents_topics(identifier_of_visited_art_stories_list)
+
+    # Get the cluster indices
+    visited_topic_indices = visited_vector_topics[0]
+    # Now for each cluster get me the most similar document based on the cluster
+    recommendation = []
+    for visited_topic_index in visited_topic_indices:
+        # Show top 1 document for each topic
+        similar_documents_based_on_topic = top2vec_model.search_documents_by_topic(visited_topic_index, num_docs=1)
+        recommendation.append(similar_documents_based_on_topic[0])
+    return recommendation
+
+visited_art_stories = [1, 4, 7]
+recommendations = recommend_art_stories_python_function(visited_art_stories)
+print("Recommended art stories:")
+for recommendation in recommendations:
+    print(recommendation)
