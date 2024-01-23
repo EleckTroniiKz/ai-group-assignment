@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<body>
+    <div style="text-align: center;">
+        <br>
+        <form method="post">
+            <div><label>User-ID: </label> <input type="number" name="user_id"></div>
+            <br>
+            <button type="submit">Empfehle Kunstwerke!</button>
+        </form>
+    </div>
+    <!--Return values-->
+    <div style="align-items: center; text-align: center;">
+        {% if data %}
+            <h1>Results</h1>
+            <table style="margin-left: auto; margin-right: auto;">
+                {% for key in data.items() %}
+                <th>Artwork-ID</th><th>{{key[0]}}</th>
+                    {% for key_sub, value_sub in key[1].items() %}
+                    <tr>
+                        <td>{{key_sub}}</td><td>{{value_sub}}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        {% endif %}
+        </div>
+</html>

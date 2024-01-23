@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<body>
+
+
+    <!--Form-->
+    <div style="text-align: center;">
+        <br>
+        <form method="post">
+            <div><label>Artwork-ID: </label> <input type="number" name="artwork_id"></div>
+            <br>
+            <button type="submit">Empfehle ähnliche Kunstwerke!</button>
+        </form>
+    </div>
+    <!--Return values-->
+    <div style="align-items: center; text-align: center;">
+        {% if data %}
+            <h1>Results</h1>
+            <table style="margin-left: auto; margin-right: auto;">
+                <tr>
+                    <th>Artwork-ID</th><th>Score</th>
+                </tr>
+                {% for key, value in data.items() %}
+                <tr>
+                    <td>{{key}}</td><td>{{value}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    </div>
+</html>
