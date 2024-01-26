@@ -13,6 +13,10 @@ import seaborn as sns  #0.11.1
 import wikipediaapi  #0.5.8
 #import wikipedia  #0.5.8
 import nltk  #3.8.1
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
 import re   
 
 ## for nlp
