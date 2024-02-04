@@ -66,6 +66,8 @@ class ArtKnowledgeGraph:
         soup = BeautifulSoup(text, 'html.parser')
         text = soup.get_text()
         text = re.sub(r'\s+', ' ', text)
+        re.sub(r"[^\w\s\.\!\?\(\)]", "", text)
+
         with open("C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Aufgabe 3\\ArtKnowledgeGraph\\ArtKnowledgeGraph\\Output.txt", "w", encoding="utf-8") as t_file:
             t_file.write(text)
             t_file.close()
@@ -158,7 +160,7 @@ class ArtKnowledgeGraph:
             dt = np.nan
         return dt
 
-    def process(self):
+    def process(self, word):
         print("Starting process")
         show_word_frequency = True
 
@@ -226,7 +228,7 @@ class ArtKnowledgeGraph:
         in the provided code here would be the same loop, but for Location. I skipped this, because in the provided code, the results of that loop were not used. So to lower the computation time, that part is skipped
         """
 
-        GRAPH = nx.from_pandas_edgelist(dataframe_one, source="entity", target="object", edge_attr="relation", create_using=nx.DiGraph())
+        GRAPH = nx.from_pandas_edgelist(dataframe_one.head(15), source="entity", target="object", edge_attr="relation", create_using=nx.DiGraph())
 
         print("Generating first ttl File")
         self.generate_ttl_file(GRAPH, "output_file.ttl")
@@ -246,7 +248,7 @@ class ArtKnowledgeGraph:
         print("Showing first plot. Please close the View of the Plot, to continue the code execution.")
         plt.show()
 
-        f = "UBS"
+        f = word
         tmp = dataframe_one[(dataframe_one["entity"] == f) | (dataframe_one["object"]==f)]
         GRAPH = nx.from_pandas_edgelist(tmp, source="entity", target="object", edge_attr="relation", create_using=nx.DiGraph())
 
@@ -271,9 +273,8 @@ class ArtKnowledgeGraph:
 
         edges = np.array([(pos[u],pos[v]) for u,v in GRAPH.edges() if v!=f])
         center_edges = np.array([(pos[u],pos[v]) for u,v in GRAPH.edges() if v==f])
-
-        ax.scatter(*nodes.T, s=200, ec="w", c="skyblue", alpha=0.5)
-        ax.scatter(*center_node.T, s=200, c="red", alpha=0.5)   
+        if(len(nodes.T) > 0): ax.scatter(*nodes.T, s=200, ec="w", c="skyblue", alpha=0.5)
+        if(len(center_node.T) > 0): ax.scatter(*center_node.T, s=200, c="red", alpha=0.5)
 
         print("Linking Edges")
         for link in edges:
@@ -387,7 +388,7 @@ class ArtKnowledgeGraph:
         print('End')
 
 
-absolute_path = ""
+absolute_path = "C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Aufgabe 3\\ArtKnowledgeGraph\\ArtKnowledgeGraph\\Data\\Art_Stories.csv"
 
-A = ArtKnowledgeGraph(absolute_path, isPDF=True, topic= "Art Basel Fair")
-A.process()
+A = ArtKnowledgeGraph(absolute_path, isPDF=False, topic= "Art Basel Fair")
+A.process("I")
