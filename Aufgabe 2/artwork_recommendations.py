@@ -9,12 +9,6 @@ from itertools import product
 
 # Load user-item interaction matrix (R) from CSV file
 print('Loading data...')
-"""R_df = pd.read_csv(r"User-Item_Interaction_Matrix.csv", delimiter=';', index_col=0)
-R_matrix = R_df.values
-# Convert to a sparse matrix
-sparse_user_item = sparse.csr_matrix(R_matrix)"""
-
-
 R_df = pd.read_csv(r"User-Item_Interaction_Matrix.csv", delimiter=';', index_col=0)
 R_matrix = R_df.values
 
