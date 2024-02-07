@@ -1,5 +1,5 @@
 import time
-import numpy as np
+import json
 import pandas as pd
 import scipy.sparse as sparse
 import implicit
@@ -14,7 +14,10 @@ R_matrix = R_df.values
 
 # Convert to a sparse matrix
 sparse_user_item = sparse.csr_matrix(R_matrix)
+
 """
+This Section is for testing the model with the best parameters
+
 #Testing the Model
 (train, test) = implicit.evaluation.train_test_split(sparse_user_item)
 sparse_user_item_weighted = bm25_weight(train, K1=50, B=0.8)
@@ -22,7 +25,10 @@ model = implicit.als.AlternatingLeastSquares(factors=10,regularization=0.01,alph
 trained = model.load(r"recommendation_model_ranked")
 ranking = evaluation.ranking_metrics_at_k(trained,sparse_user_item_weighted,bm25_weight(test, K1=50, B=0.8))
 print(str(ranking))
-{'precision': 0.9032258064516129, 'map': 0.8833333333333333, 'ndcg': 0.9243462449410487, 'auc': 0.8322677021812552}"""
+{'precision': 0.9032258064516129, 'map': 0.8833333333333333, 'ndcg': 0.9243462449410487, 'auc': 0.8322677021812552}
+"""
+
+
 # weighting the data
 sparse_user_item_weighted = bm25_weight(sparse_user_item, K1=50, B=0.8)
 
@@ -70,14 +76,19 @@ def user_recommend():
 
             # convert explanations to Artwork IDs
             explanations = [artwork_ids[explanation[0]] for explanation in explanations]
-
+            profile_dict = dict()
+            with open("user_profile.txt", "r") as profile:
+                # Load the dictionary from the file
+                profile_dict = json.load(profile)
+            print(profile_dict[str(user_id)])
             # Convert the results to a dictionary of artwork IDs and scores and explanations
             results = pd.DataFrame({'Artwork': artwork_ids[ids], 'Score': scores, 'Top Artworks': explanations})
             results_dict = results.set_index('Artwork').to_dict()
             #            results_df = pd.DataFrame(results_dict.items())
 
             #            return jsonify(results_dict)
-            return render_template('user_recommendation_form.html', data=results_dict)
+            print(results_dict.items())
+            return render_template('user_recommendation_form.html', data=(results_dict, profile_dict[str(user_id)]))
 
         except Exception as e:
             return jsonify({'error': str(e)})
