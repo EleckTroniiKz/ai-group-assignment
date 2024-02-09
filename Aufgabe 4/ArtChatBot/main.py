@@ -23,7 +23,7 @@ from langchain.prompts import (
 
 import streamlit as st
 
-# Bibs f체r die Metriken (SSA) und Perplexit채t
+# Bibs für die Metriken (SSA) und Perplexität
 from transformers import AutoTokenizer, AutoModelWithLMHead
 from sklearn.preprocessing import normalize
 from rouge import Rouge
@@ -129,15 +129,24 @@ def get_conversation_chain(vector_store: FAISS, system_message: str, human_messa
     return conversation_chain
 
 
-# Aufgabe 2 Perplexit채t)
+# Aufgabe 2 Perplexität)
 def calculate_perplexity(response):
+    """This function calculates the perplexity of a given response using the pre trained gpt-2 model."""
+
+    # Load the tokenizer for the model.
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+    # Load the model.
     model = AutoModelWithLMHead.from_pretrained("gpt2")
+
+    # Now tokenize the response and encode it as "input IDs."
     input_ids = tokenizer.encode(response, return_tensors='pt')
+
     with torch.no_grad():
         outputs = model(input_ids, labels=input_ids)
+        # Extract the loss from the outputs.
         loss = outputs.loss
-        # calculate the perplexity out of the entropy-loss
+        # Calculate perplexity from the loss (exponential of loss).
         perplexity = torch.exp(loss)
     return perplexity.item()
 
@@ -148,20 +157,39 @@ rouge = Rouge()
 
 
 def calculate_sensibleness(user_question, response):
+    """Calculate the sesibleness of a given response based on the Rogue scores"""
+
+    # Calculate the Rouge scores between the user_quetsion and response
     rouge_scores = rouge.get_scores(user_question, response)
+
+    # Extract Rogue-1 recall score (unigram: measures the overlap of unigrams --> single words)
     rouge_1_recall = rouge_scores[0]['rouge-1']['r']
+
+    # Extract Rogue-2 recall score (bigram: measures the overlap of bigrams --> sequences of two adjacent words)
     rouge_2_recall = rouge_scores[0]['rouge-2']['r']
+
+    # Calculate the average of Rouge-1 and Rouge-2 recall scores
     return (rouge_1_recall + rouge_2_recall) / 2
 
 
 def calculate_specificity(user_question, response):
+    """Calculates the specificity of a given response based on Rouge scores"""
+
+    # Calculate the Rouge scores between the response and user_question
     rouge_scores = rouge.get_scores(response, user_question)
+
+    # Extract Rogue-1 recall score (unigram: measures the overlap of unigrams --> single words)
     rouge_1_recall = rouge_scores[0]['rouge-1']['r']
+
+    # Extract Rogue-2 recall score (bigram: measures the overlap of bigrams --> sequences of two adjacent words)
     rouge_2_recall = rouge_scores[0]['rouge-2']['r']
+
+    # Calculate the average of Rouge-1 and Rouge-2 recall scores
     return (rouge_1_recall + rouge_2_recall) / 2
 
 
 def calculate_ssa(user_question, response):
+    """Calculates the Sensibleness and Specificity Average (SSA) of a given response"""
     sensibleness = calculate_sensibleness(user_question, response)
     specificity = calculate_specificity(user_question, response)
     return (sensibleness + specificity) / 2
@@ -288,7 +316,7 @@ if __name__ == "__main__":
 
     # Aufgabe 4.1, wir gehen davon aus das wir nach einer Anfrage jeweils nach <role> dementsprechende Ergebnisse
     # erwarten.
-    # (Die Aufgabe wird als Kunde betrachtet, ohne Wissen 체ber die Datenbank)
+    # (Die Aufgabe wird als Kunde betrachtet, ohne Wissen über die Datenbank)
     """
     | Prompt | As a <role> | I want <goal> | so that <benefit> | Acceptance Criteria |
     |--------|--------------|---------------|-------------------|---------------------|
@@ -297,18 +325,19 @@ if __name__ == "__main__":
     | Hey I make art about mostly landscapes like Bob Ross, can you inspire me with some for new ideas | As an art maker (artist) | I want to get inspired by new art or art stories | So that I can draw something new or even out of my normal habitat | The chatbot should in this case provide logical recommandation about landscapes... |
     
     """
-    # Aufgabe 4.2, Die Metriken wurden berechnet und es kamen plausible werte f체r diese raus. F체r die Optimierung wurde
-    # der Code sauber aufgeteilt um optimierungsstellen erkennen zu k철nnen. Es wurde die vektoren erstellung
+    # Aufgabe 4.2, Die Metriken wurden berechnet und es kamen plausible werte für diese raus. Für die Optimierung wurde
+    # der Code sauber aufgeteilt um optimierungsstellen erkennen zu können. Es wurde die vektoren erstellung
     # "optimiert",
-    # uns war wird dieser Normalisiert.
+    # in dem diese normalisiert werden. Weitere möglichkeiten sind bessere Text prozessierung auszuwählen, das Model
+    # selber fine tunen. Beides wurde versucht jedoch hat sich nichts großes an den Metriken geändert.
 
     # Aufgabe 4.3, beurteilen von weiteren Optimierungspotenzialien
     """
     Anstelle von Rogue oder BLEU oder anderen Metriken sollte eine selbsterstellte Metrik zur Berechnung von SSA genutzt
-    werden, weil die selbsterstellte Metrik auf unseren chat-Bot optimiert werden k철nnen. Es gibt vier Antworttypen extraktiv,
-    abstrakt, ja-nein und multiple-choiche. Unsere selbsterstellte Metrik k철nnte beispielsweise f체r extraktive Antworten optimiert
+    werden, weil die selbsterstellte Metrik auf unseren chat-Bot optimiert werden können. Es gibt vier Antworttypen extraktiv,
+    abstrakt, ja-nein und multiple-choiche. Unsere selbsterstellte Metrik könnte beispielsweise für extraktive Antworten optimiert
     sein, wenn unser chat-Bot nur extraktive Antworten gibt.
-    Unser chat-Bot soll kontextbezogene Antworten (passend zu einer z.B. Art story) liefern. Das heist der chat-Bot soll daf체r
-    optimiert sein und kein "allesk철nner" sein --> Bezogen auf eine Kunstmesse.
+    Unser chat-Bot soll kontextbezogene Antworten (passend zu einer z.B. Art story) liefern. Das heist der chat-Bot soll dafür
+    optimiert sein und kein "alleskönner" sein --> Bezogen auf eine Kunstmesse.
     Siehe: https://fbi.h-da.de/fileadmin/Personen/fbi1119/Michel-Masterarbeit.pdf
     """
