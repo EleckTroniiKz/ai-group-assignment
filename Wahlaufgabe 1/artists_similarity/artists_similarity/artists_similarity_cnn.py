@@ -98,7 +98,7 @@ def get_avg_colour(img):
     top_colours = colour_counts.most_common(5)
     top_colour_set = set([colour[0] for colour in top_colours])
     new_pixels = [pixel for pixel in flattened_pixels if tuple(pixel) not in top_colour_set]
-    num_pixels = len(new_pixels)
+    num_pixels = len(new_pixels)  
 
     # Calculate the average RGB values
     total_rgb = np.sum(new_pixels, axis=0)
@@ -196,7 +196,7 @@ plt.show()
 
 
 
-# Extract features using NASNetLarge pretriained model
+# Extract features using NASNetLarge pretrained model
 # The last layer is removed
 wikiart_model = tf.keras.applications.NASNetLarge(
     include_top=False, weights='imagenet', input_shape=(224, 224, 3)
@@ -232,7 +232,7 @@ df_pca = pca.transform(df_grp)
 df_pca = pd.DataFrame(df_pca, index=df_grp.index)
 
 print(f"Size of feature before PCA : {features_cnn_flat.shape[0]}")
-print(f"Size of feature before PCA : {df_pca.shape[1]}")
+print(f"Size of feature after PCA : {df_pca.shape[1]}")
 
 
 print(f"Cumulative explained variance ration of first two PCs: {pca.explained_variance_ratio_.cumsum()[0:2]}")
@@ -290,3 +290,29 @@ plt.box(None)
 plt.tight_layout()
 plt.show()
 
+"""
+Aufgabe 1a)
+
+In this file, there are three plots generated. The first plot shows a random selection of images from the dataset. 
+The second plot shows the average colour of each artist's work. The third plot shows the artists projected on the first two principal components.
+
+The first task is to describe the method that is used to calculate the similarity between the artists.
+
+To calculate the similarity between the artists, every pixel of each image is used. 
+Those pixels have RGB formats, but are reshaped into values betweem -1 and 1. 
+The image informations is thrown into the models predict method, which returns the prediction of features of the image.
+The Model which is used is a Convolutional Neural Network (CNN) called NASNetLarge. NASNetLarge has been trained on more than a million images.
+(This will sound very informal, but I can't find a better way to describe it. I'm sorry. I hope it's okay.) -> it is extremely cool, that we can just import a CNN,
+and make use of it, without having to train it ourselves.
+
+After saving those predictions/features, in a dataframe with fitting labels, the dataframe is grouped and then the average numbers are calculated. 
+
+After the the magic happens. A PCA instance is created and the fit method is called with the grouped dataframe as parameter, which trains the model to the dataframe data.
+PCA (Principal Component Analysis) is a dimension reduction technique, which is used to extract important features from a high dimensional dataset
+and transforming them into a set of vairables, which do not correcalte (Principal Components).
+
+In this case, 7 PCAs are reduced to 5. And the first two PCAs are used to plot the artists in a 2D space.
+The first PC captures the direction in the feature space, where the data has the highest variance. 
+The second PC has the second highest variance, ... and so on.
+
+"""
