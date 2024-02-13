@@ -234,6 +234,17 @@ def recommend_art_stories_python_function(identifier_of_visited_art_stories_list
     return recommendation
 
 """
+To test the rank_art_stories_python_function, first call read_document_text. 
+And then you can call the rank_art_stories_python function with a query. It will return a dataframe, which will show the most similar documents to the user query.
+"""
+
+"""
+To test the method doc2vec_model you do not need to call read_document_text.
+Just call it with a user query, and it will return a list of tuples, where the first value is the document and the second value is the rank.
+"""
+
+"""
+If oyu want to test out recomment_art_stories_python_function, you can use it in the following way:
 visited_art_stories = [1, 4, 7]
 recommendations = recommend_art_stories_python_function(visited_art_stories)
 print("Recommended art stories:")
