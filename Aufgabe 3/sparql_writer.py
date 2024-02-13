@@ -1,4 +1,8 @@
 
+"""
+    The file data_task.json contains the mock data we were supposed to create according to the data already provided.
+"""
+
 
 def natural_language_to_sparql(natural_language_query_string):
     """
