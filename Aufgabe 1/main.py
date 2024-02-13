@@ -2,6 +2,8 @@ import pandas as pd
 import re
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from top2vec import Top2Vec
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
+from nltk.tokenize import word_tokenize
 
 
 """
@@ -31,6 +33,17 @@ def createBagOfWords(wordList):
         else:
             newVec[word] = 0
     vectors.append(newVec) 
+
+def clean_text(text_to_clean):
+    """ This method will receive a string, and returns the same string as a list of words, cleaned of any syntactical symbols like commas, parentheses, semicoli, ...
+    """
+    # first remove line breaks in the text
+    string_without_linebreaks = text_to_clean.replace('\\n', ' ')
+    # then remove NON alphabetical and NON numerical values
+    cleaned_string = re.sub(r'[^a-zA-Z0-9]', ' ', string_without_linebreaks)
+    # replace double spaces and then turn to lowercase
+    cleaned_string = cleaned_string.replace('  ', ' ').lower()
+    return cleaned_string
 
 def text_to_word_list(text_to_clean):
     """ This method will receive a string, and returns the same string as a list of words, cleaned of any syntactical symbols like commas, parentheses, semicoli, ...
@@ -145,6 +158,39 @@ def rank_art_stories_python_function(user_query_string):
     Bei dem Modell von gensim sollten z.B. 15 Dokumente von diesem Volumen wie hier ausreichen.
 """
 
+def doc2Vec_model(user_query_string):
+
+    # Read the given documents into array. Here the bag of words from earlier won't be used, and we will make sure to use the convenience of provided methods.
+    documents = []
+    with open('./Aufgabe 1/art_stories_examples.csv', 'r', encoding="utf-8") as file:
+        for line in file.readlines()[1:]:
+            lineSecs = line.split(";")
+            documents.append(clean_text(lineSecs[1]) + clean_text(lineSecs[2]) + clean_text(lineSecs[3]))
+
+
+    # Tokenize and tag the documents
+    tagged_data = [TaggedDocument(words=word_tokenize(_d.lower()), tags=[str(i)]) for i, _d in enumerate(documents)]
+
+    # Create instance of Doc2Vec and provide tagged data to train it
+    model = Doc2Vec(vector_size=20, min_count=1, epochs=100)
+    model.build_vocab(tagged_data)
+    model.train(tagged_data, total_examples=model.corpus_count, epochs=model.epochs)
+
+    # Create Vector for user query, with infer_vector method, because the words in the user query can not assure if they are in the vocabulary
+    user_vector = model.infer_vector(word_tokenize(user_query_string.lower()))
+
+    # Go through every document and generate Ranking. The ranking will be a list of tuples, where the first value is the document and the second value is the rank.
+    ranks = []
+    for i in range(len(documents)):
+        doc_vector = model.docvecs[str(i)]
+        rank = cosine_similarity([user_vector.tolist()], [doc_vector.tolist()])[0][0]
+        ranks.append((documents[i], rank))
+
+    # Sort by rank
+    ranks.sort(key=lambda x: x[1])
+
+    return ranks
+
 
 # c)
 def recommend_art_stories_python_function(identifier_of_visited_art_stories_list):
@@ -187,8 +233,10 @@ def recommend_art_stories_python_function(identifier_of_visited_art_stories_list
         recommendation.append(similar_documents_based_on_topic[0])
     return recommendation
 
+"""
 visited_art_stories = [1, 4, 7]
 recommendations = recommend_art_stories_python_function(visited_art_stories)
 print("Recommended art stories:")
 for recommendation in recommendations:
     print(recommendation)
+"""
