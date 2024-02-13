@@ -195,8 +195,6 @@ plt.suptitle("Average Colour by Artist", fontsize=12)
 plt.tight_layout()
 plt.show()
 
-
-
 # Extract features using NASNetLarge pretrained model
 # The last layer is removed
 wikiart_model = tf.keras.applications.NASNetLarge(
@@ -222,9 +220,7 @@ df_features=pd.DataFrame(features_cnn_flat)
 df=pd.concat([df_label,df_features],axis=1)
 df.head()
 
-
 df_grp = df.groupby('artist').mean()
-
 
 pca=PCA(n_components=0.99)
 pca.fit(df_grp)
@@ -267,7 +263,7 @@ def clustering_task(pcs):
             col = plt.cm.jet(label / n_clusters_)
         class_member_mask = (labels == label)
         
-        ax.scatter(pcs[:0], pcs[:1], pcs[:2], c=col, s=50, edgecolor='k', label=label)
+        #ax.scatter(pcs[:0], pcs[:1], pcs[:2], c=col, s=50, edgecolor='k', label=label)
     
     ax.set_xlabel('Principal Component 1')
     ax.set_ylabel('Principal Component 2')
@@ -275,7 +271,7 @@ def clustering_task(pcs):
     plt.title('DBSCAN Clustering of Artists')
     plt.show()
     
-clustering_task(pcs.tolist())
+#clustering_task(pcs.tolist())
 
 # Plotting the first two principal components
 plt.figure(figsize=(12, 10))
@@ -328,21 +324,61 @@ The second plot shows the average colour of each artist's work. The third plot s
 
 The first task is to describe the method that is used to calculate the similarity between the artists.
 
-To calculate the similarity between the artists, every pixel of each image is used. 
-Those pixels have RGB formats, but are reshaped into values betweem -1 and 1. 
-The image informations is thrown into the models predict method, which returns the prediction of features of the image.
-The Model which is used is a Convolutional Neural Network (CNN) called NASNetLarge. NASNetLarge has been trained on more than a million images.
-(This will sound very informal, but I can't find a better way to describe it. I'm sorry. I hope it's okay.) -> it is extremely cool, that we can just import a CNN,
-and make use of it, without having to train it ourselves.
+At first the code is not even comparing the similarities. First it will plot 4 random images and then calculate the average color of each artist. 
+That is not of importance for the similarity calculation, but it is a nice visualization of the data.
 
-After saving those predictions/features, in a dataframe with fitting labels, the dataframe is grouped and then the average numbers are calculated. 
+To measure the similarity between the artists, the code uses a pretrained model called NASNetLarge. NASNetLarge is a convolutional neural network, which is trained on the ImageNet dataset.
+The code uses the NASNetLarge model to extract features from the images. The features are then used to calculate the similarity between the artists.
+After extracting the features, the images are represented by a matrix of numbers with the dimensions of 197568, which provide how much of a certain feature is present in the image.
 
-After the the magic happens. A PCA instance is created and the fit method is called with the grouped dataframe as parameter, which trains the model to the dataframe data.
-PCA (Principal Component Analysis) is a dimension reduction technique, which is used to extract important features from a high dimensional dataset
-and transforming them into a set of vairables, which do not correcalte (Principal Components).
+The artists are then grouped and then the average value of each feature is calculated for each artist.
+After that, the dimension of the matrices is lowered. To lower the dimension from 197568, to a more manageable size, the PCA algorithm is used.
+The PCA algorithm is used to reduce the dimension of the feature matrix, while still keeping the most important features.
 
-In this case, 7 PCAs are reduced to 5. And the first two PCAs are used to plot the artists in a 2D space.
-The first PC captures the direction in the feature space, where the data has the highest variance. 
-The second PC has the second highest variance, ... and so on.
+With the first two Primary Components the artist are then plotted in a 2D space. The distance between the artists in the 2D space is then used to calculate the similarity between the artists.
+
+"""
+
+"""
+Aufgabe 1b)
+According to the task, we need to "Cluster the artists in senseful groups".
+
+We are not fully sure, if this means, that the professor expects us to program a clustering algorithm, or if we should just use the PCA to cluster the artists.
+
+But first, we will only cluster the currently given artists by hand. 
+We have provided Pablo Picasso, Claude Monet, Henri Rousseau and Paul Gauguin. 
+The plot is very easily sererable into four clusters, which are the artists themselves.
+
+So we would have 4 Clusters, which are the artists themselves, and the names of the cluster depend on the artist.
+There are different ways to cluster the images. We could cluster based on the average colour of the images, or we could just cluster about the historical and cultural relations. 
+But In this task, were we cluster by hand, we will use the art epoches to cluster the images.
+
+First Pablo Picasso. The Clust of Pablo Picasso would have the name "Cubism". Cubbism ist a art epoch, which was strongly influenced by Pablo Picasso and Georges Braque.
+Cubistic art often portraits objects from different perspectives, which are combined into one picture. The objects are often shown in a geometric form.
+
+Second Claude Monet. The Cluster of Claude Monet would have the name "Impressionism". Impressionism is a art epoch, which was strongly influenced by Claude Monet and Pierre-Auguste Renoir.
+Impressionistic art has the goal to capture the momentary impression of a scene. The paintings are often very colorful and the brushstrokes are very visible.
+
+Third Henri Rousseau. The Cluster of Henri Rousseau would have the name "Primitive". Primitive Art is a art epoch, in which the art makes use of simplistic forms, strong colors and symbolic motives from non western or primitive cultures.
+It is important to note, that primitive is not a label to "insult" the artists.
+
+Fourth Paul Gauguin. The Cluster of Paul Gauguin would have the name "Post Impressionism". Post Impressionism is a art epoch, which was strongly influenced by Paul Gauguin and Vincent van Gogh.
+Post Impressionistic art is a reaction to the Impressionism. The art is often more symbolic and the colors are often more expressive.
+
+
+If we would need to cluster the artists via code, we would use the DBSCAN algorithm, which is a density based clustering algorithm.
+The DBSCAN algorithm is used to find high density areas in the dataset, and can be used here, because it is not previously known, how many clusters there are.
+The DBSCAN algorithm will find those clusters by itself, so it is very dynamic to the amount of input pictures put in.
+"""
+
+"""
+    Aufgabe 1c)
+
+    Now following is the task, in which we need to evaluate the significance of the similarity measurement of artists that is described in the code.
+
+    The similarity measurement of the artists is significant, because it is based on the features of the images. The features are extracted from the images by a pretrained model, which is trained on the ImageNet dataset.
+    So the model was trained on millions of images, and is able to extract the most important features from the images. The features are then used to calculate the similarity between the artists.
+
+    It is fair to assume, that the similarity that is measured between the artists is fairly accurate. 
 
 """
