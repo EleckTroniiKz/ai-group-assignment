@@ -24,6 +24,15 @@ import dateparser
 import PyPDF2
 from mpl_toolkits.mplot3d import Axes3D
 
+"""
+    The provided code was very hardly readable, because of the lack of comments and the lack of structure.
+    Because it was a JupyterNotebook before, it was not as efficient to work with in a "normal" Development environment.
+    For that reason, We decided to restructure the code and add comments to make it more readable and understandable.
+    Also we added some print statements to make it more clear, what the code is doing at the moment.
+    The code is now structured in a way, that it is easier to understand and to work with.
+    Especially with extracting specific parts to methods, to create more structure.
+"""
+
 class ArtKnowledgeGraph:
 
     def __init__(self, path, isPDF = False, topic="Art Basel Fair") -> None:
@@ -51,6 +60,9 @@ class ArtKnowledgeGraph:
         self.lst_relations = []
         self.topic = topic
 
+    # This method will take the generated graph and save it as a .ttl file
+    # For the conveniance of the devs (us :) ), a library called RDFLib is used
+    # the graph is generated using the networkx library
     def generate_ttl_file(self, GRAPH, output_file="output.ttl"):
         graph = rdflib.Graph()
 
@@ -61,6 +73,9 @@ class ArtKnowledgeGraph:
             graph.add((subj, pred, obj))
         graph.serialize(destination=output_file, format="turtle")
 
+    # This method will take the text and clean it from any html content
+    # It will then save the cleaned text to a file called "Output.txt"
+    # The gile is not needed, but during development it was helpful to see, the result of the cleanse
     def clean_text_from_html_content(self, string):
         text = re.sub('<.*?>', ' ', string)
         soup = BeautifulSoup(text, 'html.parser')
