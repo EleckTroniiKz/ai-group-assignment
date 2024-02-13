@@ -9,6 +9,7 @@ import seaborn as sns
 from PIL import Image
 import cv2
 import sklearn
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.decomposition import PCA
 from keras.models import Model
 import tensorflow as tf
@@ -246,6 +247,35 @@ artist_names = df_grp.index.tolist()
 #artist_names = df_pca['artist'].tolist()
 pcs = df_pca.values
 #pcs = df_pca.drop('artist', axis=1).values
+
+def clustering_task(pcs):
+    db_scan = DBSCAN(eps=1, min_samples=2)
+    db_scan.fit(pcs)
+    labels = db_scan.labels_
+    core_samples_mask = np.zeros_like(db_scan.labels_, dtype=bool)
+    core_samples_mask[db_scan.core_sample_indices_] = True
+
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    unique_labels = set(labels)
+    for label in unique_labels:
+        if label == -1:
+            col = 'k'
+        else:
+            col = plt.cm.jet(label / n_clusters_)
+        class_member_mask = (labels == label)
+        
+        ax.scatter(pcs[:0], pcs[:1], pcs[:2], c=col, s=50, edgecolor='k', label=label)
+    
+    ax.set_xlabel('Principal Component 1')
+    ax.set_ylabel('Principal Component 2')
+    ax.set_zlabel('Principal Component 3')
+    plt.title('DBSCAN Clustering of Artists')
+    plt.show()
+    
+clustering_task(pcs.tolist())
 
 # Plotting the first two principal components
 plt.figure(figsize=(12, 10))
