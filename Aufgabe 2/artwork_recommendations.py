@@ -6,6 +6,8 @@ import implicit
 from implicit import evaluation
 from implicit.nearest_neighbours import bm25_weight
 from itertools import product
+from flask import Flask, request, jsonify, render_template
+
 
 # Load user-item interaction matrix (R) from CSV file
 print('Loading data...')
@@ -27,22 +29,22 @@ ranking = evaluation.ranking_metrics_at_k(trained,sparse_user_item_weighted,bm25
 print(str(ranking))
 {'precision': 0.9032258064516129, 'map': 0.8833333333333333, 'ndcg': 0.9243462449410487, 'auc': 0.8322677021812552}
 """
+# In this section the model is initated with the best parameter. As an alternative the model could be loaded from the
+# recommendation_model_ranked file.
 
-
-# weighting the data
+# #weighting the data
 sparse_user_item_weighted = bm25_weight(sparse_user_item, K1=50, B=0.8)
 
 # Initialize ALS model and fit using the sparse item-user matrix
-model = implicit.als.AlternatingLeastSquares(factors=10,regularization=0.01,alpha=60)
+model = implicit.als.AlternatingLeastSquares(factors=10, regularization=0.01, alpha=60)
 
 # Generating new model with the complete data
 model.fit(sparse_user_item_weighted)
 
 model.save("recommendation_model")
 
-# Flask app
-from flask import Flask, request, jsonify, render_template
 
+# Flask app
 app = Flask(__name__)
 
 
@@ -76,6 +78,8 @@ def user_recommend():
 
             # convert explanations to Artwork IDs
             explanations = [artwork_ids[explanation[0]] for explanation in explanations]
+            # the profile information from each user is loaded. This information has been prepared in the transform
+            # step in the file prepare_user_profile
             profile_dict = dict()
             with open("user_profile.txt", "r") as profile:
                 # Load the dictionary from the file
@@ -127,6 +131,9 @@ def artwork_recommend():
 
 
 def find_parameters(train, test, num_iterations=5):
+    """
+    This method has been used to find the best parameters.
+    """
     start = time.time()
     factors_values = [10, 20, 30, 40, 50]
     regularization_values = [0.01, 0.1, 0.2, 0.5]
@@ -155,10 +162,10 @@ def find_parameters(train, test, num_iterations=5):
             weighted_train = bm25_weight(train, K1=K1, B=B)
             weighted_test = bm25_weight(test, K1=K1, B=B)
             untrained_model = implicit.als.AlternatingLeastSquares(factors=factor, regularization=regularization,
-                                                                   alpha=alpha,num_threads=0)
+                                                                   alpha=alpha, num_threads=0)
             untrained_model.fit(weighted_train)
             ranking = evaluation.ranking_metrics_at_k(untrained_model, weighted_train, weighted_test,
-                                                      show_progress=False,num_threads=0)
+                                                      show_progress=False, num_threads=0)
             total_ranking = ranking['precision'] + ranking['map'] + ranking['ndcg']
             if best_total < total_ranking:
                 untrained_model.save("recommendation_model_ranked")
@@ -168,7 +175,8 @@ def find_parameters(train, test, num_iterations=5):
 
             if best_precision < ranking['precision']:
                 best_precision = ranking['precision']
-                best_precision_params = {'factor': factor, 'regularization': regularization, 'alpha': alpha, 'K1': K1, 'B': B}
+                best_precision_params = {'factor': factor, 'regularization': regularization, 'alpha': alpha, 'K1': K1,
+                                         'B': B}
                 best_precision_metrics = ranking
 
             if best_map < ranking['map']:
@@ -178,7 +186,8 @@ def find_parameters(train, test, num_iterations=5):
 
             if best_ndcg < ranking['ndcg']:
                 best_ndcg = ranking['ndcg']
-                best_ndcg_params = {'factor': factor, 'regularization': regularization, 'alpha': alpha, 'K1': K1, 'B': B}
+                best_ndcg_params = {'factor': factor, 'regularization': regularization, 'alpha': alpha, 'K1': K1,
+                                    'B': B}
                 best_ndcg_metrics = ranking
 
     print("Best Total Ranking: ", best_total)
