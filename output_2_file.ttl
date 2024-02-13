@@ -1,0 +1,141 @@
+@prefix ns1: <could_n’> .
+@prefix ns2: <’> .
+@prefix ns3: <do_n’> .
+@prefix ns4: <did_n’> .
+@prefix ns5: <ca_n’> .
+
+<I> <adapted> <slides> ;
+    <adored> <someone_art> ;
+    <appreciated> <collaboration> ;
+    <ask> <her> ;
+    <asked> <Tadao_Ando> ;
+    <began> <collecting_I>,
+        <to_become_known> ;
+    ns5:t_hear <thing> ;
+    <can_see> <difference> ;
+    <collect> <work> ;
+    <could_afford> <pieces> ;
+    ns1:t_reconcile <action> ;
+    <curated> <Mexican_Pavilion> ;
+    <decided> <to_cut_the_tagline>,
+        <to_withdraw> ;
+    <developed> <gallery> ;
+    <did> <film> ;
+    ns4:t_know <anything> ;
+    <do> <that> ;
+    ns3:t_have <to_choose> ;
+    ns3:t_need <to_listen> ;
+    <do_reserve> <myself> ;
+    <drew> <tiger> ;
+    <encountered> <Jasper_Johns_work> ;
+    <feel> <this> ;
+    <found> <what> ;
+    <get> <satisfaction> ;
+    <guess> <some> ;
+    <had> <rest> ;
+    <had_been_collecting> <hair> ;
+    <had_loved> <art> ;
+    <had_read> <times> ;
+    <hate> <idea> ;
+    <have> <Hujar_photographs>,
+        <doubt>,
+        <knowledge>,
+        <revolve>,
+        <selection>,
+        <time>,
+        <to_say> ;
+    <have_felt> <honesty_desire> ;
+    <hear> <galleries>,
+        <lot> ;
+    <knew> <location> ;
+    <like> <What_to_do>,
+        <glass>,
+        <process> ;
+    <like_meeting> <artists> ;
+    <liked> <Marisol> ;
+    <lived> <Downtown> ;
+    <love> <making_a_new_space>,
+        <piece>,
+        <way> ;
+    <loved> <drawings>,
+        <everything>,
+        <school>,
+        <them> ;
+    <make> <landscape> ;
+    <making> <things> ;
+    <married> <fellow> ;
+    <mean> <introduction> ;
+    <met> <Carolee>,
+        <Steve_Pepper>,
+        <whom> ;
+    <moved> <people> ;
+    <mustered> <courage> ;
+    <needed> <to_talk> ;
+    <never_stopped> <believing_in_myself>,
+        <working> ;
+    <never_told> <mother> ;
+    <never_touch> <canvas> ;
+    <noticed> <word> ;
+    <put> <slips> ;
+    <read> <Gore_Vidal>,
+        <article>,
+        <book> ;
+    <receive> <attention> ;
+    <received> <responses> ;
+    <remember> <car_trip>,
+        <opening> ;
+    <respect> <aesthetic>,
+        <opinion> ;
+    <run> <event_series> ;
+    <said> <Wait_here> ;
+    <saw> <mass_group> ;
+    <see> <listings>,
+        <opportunities> ;
+    <seek> <balance> ;
+    <sent> <email> ;
+    <show> <artist>,
+        <one> ;
+    <showed> <Bob_Thompson> ;
+    <shows> <you> ;
+    <spent> <whole> ;
+    <started> <Fuck_Painting>,
+        <block>,
+        <to_move_them_around> ;
+    <talked> <dog>,
+        <shapes> ;
+    <tell> <students> ;
+    <think> <ambiguity> ;
+    <to_deepen> <relationships> ;
+    <told> <him> ;
+    <took> <photos>,
+        <residue> ;
+    <turned> <21>,
+        <30>,
+        <four> ;
+    <understand> <trepidation> ;
+    <wander> <alleyways> ;
+    <want> <What>,
+        <connections>,
+        <to_fight_for> ;
+    <wanted> <to_help_artists> ;
+    <was_offered> <space> ;
+    <was_understanding> <context> ;
+    <would_be_alarmed> <it> ;
+    <would_like> <What_to_achieve>,
+        <to_meet_that_person> ;
+    <would_not_consider> <buying> ;
+    <would_spend> <Saturdays> ;
+    ns2:ll_be_staging <person_show> ;
+    ns2:m <team> ;
+    ns2:m_doing <research> ;
+    ns2:m_giving <much> ;
+    ns2:m_going <to_make_something> ;
+    ns2:ve_adopted <Hamilton_tartan> ;
+    ns2:ve_been_influenced <collector> ;
+    ns2:ve_done <collaborations> ;
+    ns2:ve_had <penchant> ;
+    ns2:ve_known <painting> ;
+    ns2:ve_never_employed <which> ;
+    ns2:ve_surveyed <programs> ;
+    ns2:ve_used <approach> .
+

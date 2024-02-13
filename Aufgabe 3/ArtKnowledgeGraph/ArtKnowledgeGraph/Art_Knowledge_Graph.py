@@ -123,7 +123,7 @@ class ArtKnowledgeGraph:
         print("Total sentences: " + str(len(self.lst_docs)))
 
     def extract_entities(self, doc):
-        print("Extracting entitites")
+        
         a, b, prev_dep, prev_txt, prefix, modifier = "", "", "", "", "", ""
         for token in doc:
             if token.dep_ != "punct":
@@ -152,7 +152,6 @@ class ArtKnowledgeGraph:
         return (a.strip(), b.strip())
 
     def extract_relation(self, doc):
-        print("Extracting relations")
         matcher = spacy.matcher.Matcher(self.nlp.vocab)
         p1 = [{'DEP':'ROOT'}, 
             {'DEP':'prep', 'OP':"?"},
@@ -190,8 +189,10 @@ class ArtKnowledgeGraph:
         
         for tag in self.lst_docs[3].ents:
             print(tag.text, f"({tag.label_})")
-        
+            
+        print("Extracting entitites")
         self.lst_entities = [self.extract_entities(i) for i in self.lst_docs]
+        print("Extracting relations")
         self.lst_relations = [self.extract_relation(i) for i in self.lst_docs]
 
         print("Collecting Attribute List Content")
