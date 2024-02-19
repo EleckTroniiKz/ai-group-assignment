@@ -22,7 +22,7 @@ def create_q_table_and_state_table(reward_matrix):
     
     dict = {}
 
-    for i, inner_list in enumerate(nested_list):
+    for i, inner_list in enumerate(reward_matrix):
         dict[i] = {}
         for j, value in enumerate(inner_list):
             if value != -1:
@@ -41,16 +41,27 @@ def create_q_table_and_state_table(reward_matrix):
             elif i == 20:
                 q_table[i]["L"] = dict[i][j] 
                 state_table[i]["L"] = 11
+                continue
             elif i == 7:
                 q_table[i]["L"] = dict[i][12]
                 q_table[i]["R"] = dict[i][13]
+                q_table[i]["U"] = dict[i][0]
+                q_table[i]["D"] = dict[i][24]
                 state_table[i]["L"] = 12
                 state_table[i]["R"] = 13
+                state_table[i]["U"] = 0
+                state_table[i]["D"] = 24
+                continue
             elif i == 11:
                 q_table[i]["L"] = dict[i][19]
                 q_table[i]["R"] = dict[i][20]
+                q_table[i]["U"] = dict[i][8]
+                q_table[i]["D"] = dict[i][30]
                 state_table[i]["L"] = 19
                 state_table[i]["R"] = 20
+                state_table[i]["U"] = 8
+                state_table[i]["D"] = 30
+                continue
             if j-1 == i:
                 q_table[i]["R"] = dict[i][j]
                 state_table[i]["R"] = j
