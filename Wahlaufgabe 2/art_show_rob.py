@@ -18,8 +18,8 @@ def read_xslx_into_array(file_path="C:\\Users\\Can\\Documents\\Programming\\ai-p
     result = [inner[2:] for inner in result[2:]]
     return result
 
-def create_q_table_and_state_table():
-    nested_list = read_xslx_into_array()
+def create_q_table_and_state_table(reward_matrix):
+    
     dict = {}
 
     for i, inner_list in enumerate(nested_list):
@@ -66,7 +66,19 @@ def create_q_table_and_state_table():
 
     return q_table, state_table          
 
-q_table, state_table = create_q_table_and_state_table()
+def remove_reward_from_matrix(matrix, state):
+    """
+    might work already. NOts ure
+    """
+    for i in range(len(matrix)):
+        matrix[i][state] = 0
+    return matrix
+
+reward_matrix = read_xslx_into_array()
+q_table, state_table = create_q_table_and_state_table(reward_matrix)
+"ich berechne den nächsten move"
+# remove_reward_from_matrix(reward_matrix, state) # state is the state that the robot is currently in
+# q_table, state_table = create_q_table_and_state_table(reward_matrix)
 
 
 
