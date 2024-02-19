@@ -68,6 +68,12 @@ def create_q_table_and_state_table(reward_matrix):
                 state_table[i]["L"] = 7
                 state_table[i]["R"] = 14
                 continue
+            elif i == 19:
+                q_table[i]["L"] = dict[i][18]
+                q_table[i]["R"] = dict[i][11]
+                state_table[i]["L"] = 18
+                state_table[i]["R"] = 11
+                continue
             if j-1 == i:
                 q_table[i]["R"] = dict[i][j]
                 state_table[i]["R"] = j
