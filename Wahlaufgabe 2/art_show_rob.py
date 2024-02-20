@@ -104,7 +104,7 @@ def plot_movements(moveList):
                 if i.key == pygame.K_ESCAPE:
                     running = False
                 elif i.key == pygame.K_RIGHT:
-                    id = id + 1 if id < 30 else id
+                    id = id + 1 if id < len(moveList) else id
                     screen.fill((255, 255, 255))
                     screen.blit(imp, (0, 0))
                     screen.blit(robot, get_plot_position(moveList[id]))
@@ -143,32 +143,46 @@ def create_q_table_and_state_table(reward_matrix):
         state_table[i] = {}
         for j in dict[i].keys():
             if i == 12:
-                q_table[i]["R"] = dict[i][j]
-                state_table[i]["R"] = 7
+                possible_keys = dict[i].keys()
+                if 7 in possible_keys:
+                    q_table[i]["R"] = dict[i][7]
+                    state_table[i]["R"] = 7
                 continue
             elif i == 20:
-                q_table[i]["L"] = dict[i][j]
-                state_table[i]["L"] = 11
+                possible_keys = dict[i].keys()
+                if 11 in possible_keys:
+                    q_table[i]["L"] = dict[i][11]
+                    state_table[i]["L"] = 11
                 continue
             elif i == 7:
-                q_table[i]["L"] = dict[i][12]
-                q_table[i]["R"] = dict[i][13]
-                q_table[i]["U"] = dict[i][0]
-                q_table[i]["D"] = dict[i][24]
-                state_table[i]["L"] = 12
-                state_table[i]["R"] = 13
-                state_table[i]["U"] = 0
-                state_table[i]["D"] = 24
+                possible_keys = dict[i].keys()
+                if 12 in possible_keys:
+                    q_table[i]["L"] = dict[i][12]
+                    state_table[i]["L"] = 12
+                if 13 in possible_keys:
+                    q_table[i]["R"] = dict[i][13]
+                    state_table[i]["R"] = 13
+                if 0 in possible_keys:
+                    q_table[i]["U"] = dict[i][0]
+                    state_table[i]["U"] = 0
+                if 24 in possible_keys:
+                    q_table[i]["D"] = dict[i][24]
+                    state_table[i]["D"] = 24
                 continue
             elif i == 11:
-                q_table[i]["L"] = dict[i][19]
-                q_table[i]["R"] = dict[i][20]
-                q_table[i]["U"] = dict[i][6]
-                q_table[i]["D"] = dict[i][30]
-                state_table[i]["L"] = 19
-                state_table[i]["R"] = 20
-                state_table[i]["U"] = 6
-                state_table[i]["D"] = 30
+                possible_keys = dict[i].keys()
+                if 20 in possible_keys:
+                    q_table[i]["R"] = dict[i][20]
+                    state_table[i]["R"] = 20
+                if 19 in possible_keys:
+                    q_table[i]["L"] = dict[i][19]
+                    state_table[i]["L"] = 19
+                if 6 in possible_keys:
+                    q_table[i]["U"] = dict[i][6]
+                    state_table[i]["U"] = 6
+                if 30 in possible_keys:
+                    q_table[i]["D"] = dict[i][30]
+                    state_table[i]["D"] = 30
                 continue
             if j-1 == i:
                 q_table[i]["R"] = dict[i][j]
@@ -291,7 +305,6 @@ def optimal_strategy_function(current_timestep, current_phase_number, current_st
     global new_reward_matrix, new_q_table, new_state_table
     new_reward_matrix = current_reward_matrix_dataframe.to_numpy()
     path = [current_state_number]
-    print("PATH", path)
     exit_state = 20
 
     # Phase 1
@@ -370,8 +383,14 @@ def optimal_strategy_function(current_timestep, current_phase_number, current_st
 
 
 start_time = time.time()
+new_path = []
 for index in range(1, 4):
-    path = optimal_strategy_function(start_time, 3, 3, pd.DataFrame(reward_matrix))
+    path = optimal_strategy_function(start_time, 2, 0, pd.DataFrame(reward_matrix))
+    print("RETURNED PATH:")
+    new_path = path
+
+print("FINAL PATH:", new_path)
+plot_movements(new_path)
 
 
 """
