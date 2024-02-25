@@ -76,45 +76,6 @@ def get_plot_position(state):
     elif state == 30:
         return (1000, 425)
 
-def plot_movements(moveList):
-    if len(moveList) == 0:
-        print("LIST IS EMPTY")
-        return
-    pygame.init()
-    screen = pygame.display.set_mode((1250, 500))
-    pygame.display.set_caption("Art Show Robot")
-    clock = pygame.time.Clock()
-    running = True
-    imp = pygame.image.load("C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png")
-    imp = pygame.transform.scale(imp, (1250, 500))
-    screen.blit(imp, (0, 0))
-
-    robot = pygame.image.load("C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
-    robot = pygame.transform.scale(robot, (50, 50))
-    screen.blit(robot, get_plot_position(moveList[0]))
-    pygame.display.flip()
-
-    id = 0
-   
-    while running:
-        for i in pygame.event.get():
-            if i.type == pygame.QUIT:
-                running = False
-            elif i.type == pygame.KEYDOWN:
-                if i.key == pygame.K_ESCAPE:
-                    running = False
-                elif i.key == pygame.K_RIGHT:
-                    id = id + 1 if id < len(moveList) else id
-                    screen.fill((255, 255, 255))
-                    screen.blit(imp, (0, 0))
-                    screen.blit(robot, get_plot_position(moveList[id]))
-                elif i.key == pygame.K_LEFT:
-                    id = id - 1 if id > 0 else id
-                    screen.fill((255, 255, 255))
-                    screen.blit(imp, (0, 0))
-                    screen.blit(robot, get_plot_position(moveList[id]))
-        pygame.display.update()
-    pygame.quit()       
 
 def read_xslx_into_array(file_path="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Reward_Matrix_Show_Snapshot.xlsx"):
     result = []
@@ -199,6 +160,7 @@ def create_q_table_and_state_table(reward_matrix):
 
     return q_table, state_table     
 
+possible_ideal_path = [12, 7, 0, 1, 8, 14, 15, 16, 22, 27, 28, 29, 23, 18, 10, 5, 6, 11, 20] # 6.1
 
 reward_matrix = read_xslx_into_array()
 q_table, state_table = create_q_table_and_state_table(reward_matrix)
@@ -248,6 +210,34 @@ def create_new_reward_matrix(reward_matrix, action):
             row[column_index] = -1
     return new_reward_matrix
 
+def find_best_action_with_depth(q_table, state, depth, visited=None):
+    if visited is None:
+        visited = set()
+    if depth == 0:
+        return get_best_action_from_q_table(state)
+    
+    q_values = q_table[state]
+    best_action = None
+    max_q_value = -1
+    
+    for action, q_value in q_values.items():
+        next_state = state_table[state][action]
+        if next_state in visited:
+            pass
+        next_best_action = find_best_action_with_depth(q_table, next_state, depth - 1, visited)
+        visited.add(next_state)
+        total_q_value = q_value + q_table[next_state][next_best_action[0]]
+
+        if total_q_value > max_q_value:
+            max_q_value = total_q_value
+            best_action = action
+        
+    if best_action == None:
+        best_action = create_random_action()
+        while not is_action_valid(state, best_action):
+            best_action = create_random_action()
+    return best_action
+
 
 def get_best_action_from_q_table(current_state_number):
     """
@@ -264,8 +254,8 @@ def get_best_action_from_q_table(current_state_number):
 
     if best_reward == 0:
         best_action = create_random_action()
-    #print(best_action)
-    #print(best_reward)
+        while not is_action_valid(current_state_number, best_action):
+            best_action = create_random_action()
     return best_action, best_reward
 
 
@@ -283,7 +273,24 @@ def create_random_service_task():
     for row_index in possible_actions:
         if new_reward_matrix[row_index][rand_number_state] == -1:
             new_reward_matrix[row_index][rand_number_state] = rand_number_reward
-    create_q_table_and_state_table(new_reward_matrix)
+    new_q_table, newState = create_q_table_and_state_table(new_reward_matrix)
+
+def count_service_tasks(reward_matrix):
+    """
+    :param reward_matrix: The given xlsx reward matrix
+    :return: the number of service tasks in the matrix
+    """
+    states = [x for x in range(31)]
+    hadReward = False
+    count = 0
+
+    for state in states:
+        for row in reward_matrix:
+            if row[state] > 0:
+                count += 1
+                break
+
+    return count
 
 
 def optimal_strategy_function(current_timestep, current_phase_number, current_state_number, current_reward_matrix_dataframe):
@@ -312,10 +319,6 @@ def optimal_strategy_function(current_timestep, current_phase_number, current_st
         print("PHASE 1 EXECUTED")
         starting_time = current_timestep
         while True:
-            current_time = time.time()
-            elapsed_time = current_time - starting_time
-            if elapsed_time >= 60:  # Try to execute phase one for a minute...
-                break
             random_action = create_random_action()
             is_valid = is_action_valid(new_state_number, random_action)
             if is_valid:
@@ -326,34 +329,32 @@ def optimal_strategy_function(current_timestep, current_phase_number, current_st
 
             if new_state_number == exit_state:
                 print('Total Path:', path)
-                print('Reward List:', list_of_rewards)
+                print('Reward Sum:', sum(list_of_rewards))
                 return path
 
     # Phase 2
     elif current_phase_number == 2:
         print("PHASE 2 EXECUTED")
+        serviceTasks = count_service_tasks(new_reward_matrix)
+        if serviceTasks == 0:
+            print("No service tasks available")
+            return path
         while True:
             best_action, best_reward = get_best_action_from_q_table(new_state_number)
+            #best_action = find_best_action_with_depth(new_q_table, new_state_number, 3)
             is_valid = is_action_valid(new_state_number, best_action)
             if is_valid:
                 list_of_rewards.append(best_reward)
+                old_state = new_state_number
                 new_state_number = state_table[new_state_number][best_action]
                 path.append(new_state_number)
-                new_reward_matrix = create_new_reward_matrix(new_reward_matrix, new_state_number)
+                new_reward_matrix = create_new_reward_matrix(new_reward_matrix, old_state)
                 new_q_table, new_state_table = create_q_table_and_state_table(new_reward_matrix)
-                #print(pd.DataFrame(new_reward_matrix))
-                #print(new_q_table)
-            print('Total Path:', path)
-            print('Reward List:', list_of_rewards)
-            exit_condition = -1
-            # Iteriere über alle Zeilen
-            for i in range(len(new_reward_matrix)):
-                # Iteriere über alle Spalten
-                for j in range(len(new_reward_matrix[i])):
-                    if new_reward_matrix[i][j] != -1:
-                        exit_condition = new_reward_matrix[i][j]
 
-            if exit_condition == -1:
+            print('Total Reward:', sum(list_of_rewards))
+
+            # Leave Loop, when there are no service_tasks left
+            if count_service_tasks(new_reward_matrix) == 0:
                 break
         return path
 
@@ -364,7 +365,7 @@ def optimal_strategy_function(current_timestep, current_phase_number, current_st
         while True:
             current_time = time.time()
             elapsed_time = current_time - starting_time
-            if elapsed_time >= 6:  # Try to execute phase three for six seconds...
+            if len(path) == 45:  # Try to execute phase three for six seconds...
                 break
             create_random_service_task()
             best_action, best_reward = get_best_action_from_q_table(new_state_number)
@@ -375,23 +376,69 @@ def optimal_strategy_function(current_timestep, current_phase_number, current_st
                 path.append(new_state_number)
                 new_reward_matrix = create_new_reward_matrix(new_reward_matrix, new_state_number)
                 new_q_table, new_state_table = create_q_table_and_state_table(new_reward_matrix)
-                #print(pd.DataFrame(new_reward_matrix))
-                #print(new_q_table)
-            print('Total Path:', path)
-            print('Reward List:', list_of_rewards)
-            return path
+        print('Reward List Sum:', sum(list_of_rewards))
+        return path
 
 
 start_time = time.time()
 new_path = []
+timesteps = 250
+
+paths = []
+
 for index in range(1, 4):
-    path = optimal_strategy_function(start_time, 2, 0, pd.DataFrame(reward_matrix))
-    print("RETURNED PATH:")
-    new_path = path
+    path = optimal_strategy_function(start_time, index, 12, pd.DataFrame(reward_matrix))
+    paths.append(path)
+    
+print(paths)
 
-print("FINAL PATH:", new_path)
-plot_movements(new_path)
+def plot_movements(moveLists):
+    for moveList in moveLists:
+        if len(moveList) == 0: 
+            print("LIST IS EMPTY")
+            return
+        pygame.init()
+        screen = pygame.display.set_mode((1250, 500))
+        pygame.display.set_caption("Art Show Robot")
 
+        running = True
+        imp = pygame.image.load("C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png")
+        imp = pygame.transform.scale(imp, (1250, 500))
+        screen.blit(imp, (0, 0))
+
+        robot = pygame.image.load("C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
+        robot = pygame.transform.scale(robot, (50, 50))
+        screen.blit(robot, get_plot_position(moveList[0]))
+        pygame.display.flip()
+
+        id = 0
+        font = pygame.font.Font(None, 36)
+        text = font.render("Moves: " + str(id) + " / " + str(len(moveList)-1), True, (255, 0, 0))
+        textRect = text.get_rect()
+        screen.blit(text, textRect)
+        while running:
+            for i in pygame.event.get():
+                if i.type == pygame.QUIT:
+                    running = False
+                elif i.type == pygame.KEYDOWN:
+                    if i.key == pygame.K_ESCAPE:
+                        running = False
+                    elif i.key == pygame.K_RIGHT:
+                        id = id + 1 if id < len(moveList)-1 else id
+                        screen.fill((255, 255, 255))
+                        screen.blit(imp, (0, 0))
+                        screen.blit(robot, get_plot_position(moveList[id]))
+                    elif i.key == pygame.K_LEFT:
+                        id = id - 1 if id > 0 else id
+                        screen.fill((255, 255, 255))
+                        screen.blit(imp, (0, 0))
+                        screen.blit(robot, get_plot_position(moveList[id]))
+                    text = font.render("Moves: " + str(id) + " / " + str(len(moveList)-1), True, (255, 0, 0))
+                    screen.blit(text, textRect)
+            pygame.display.update()
+    pygame.quit()       
+
+plot_movements(paths)
 
 """
     Beurteilen Sie, inwiefern der Einsatz von Dataset Aggregation zur Effizienzsteigerung Ihres Roboters bei einer realen Kunstmesse beitragen kann.
