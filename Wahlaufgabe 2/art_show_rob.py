@@ -98,7 +98,7 @@ class ShowRobotPlot:
         text = font.render("Moves: " + str(currentStateID) + " / " + str(len(currentPathList)-1), True, (255, 0, 0))
         self.screen.blit(text, textRect)
 
-    def plot(self, pathLists):
+    def plot(self, path):
         self.floor = pygame.transform.scale(self.floor, (1250, 500))
         self.robot = pygame.transform.scale(self.robot, (50, 50))
 
@@ -108,26 +108,25 @@ class ShowRobotPlot:
 
         stateID = 0
 
-        for pathList in pathLists:
-            font = pygame.font.Font(None, 36)
-            text = font.render("Moves: " + str(stateID) + " / " + str(len(pathList)-1), True, (255, 0, 0))
-            textRect = text.get_rect()
-            self.screen.blit(text, textRect)
-            print(pathList)
-            while self.running:
-                for i in pygame.event.get():
-                    if i.type == pygame.QUIT:
+        font = pygame.font.Font(None, 36)
+        text = font.render("Moves: " + str(stateID) + " / " + str(len(path)-1), True, (255, 0, 0))
+        textRect = text.get_rect()
+        self.screen.blit(text, textRect)
+        print(path)
+        while self.running:
+            for i in pygame.event.get():
+                if i.type == pygame.QUIT:
+                    self.running = False
+                elif i.type == pygame.KEYDOWN:
+                    if i.key == pygame.K_ESCAPE:
                         self.running = False
-                    elif i.type == pygame.KEYDOWN:
-                        if i.key == pygame.K_ESCAPE:
-                            self.running = False
-                        elif i.key == pygame.K_RIGHT:
-                            stateID = stateID + 1 if stateID < len(pathList)-1 else stateID
-                        elif i.key == pygame.K_LEFT:
-                            stateID = stateID - 1 if stateID > 0 else stateID
-                    self.redraw_everything(stateID, pathList, font, text, textRect)
-                        
-                pygame.display.update()
+                    elif i.key == pygame.K_RIGHT:
+                        stateID = stateID + 1 if stateID < len(path)-1 else stateID
+                    elif i.key == pygame.K_LEFT:
+                        stateID = stateID - 1 if stateID > 0 else stateID
+                self.redraw_everything(stateID, path, font, text, textRect)
+                    
+            pygame.display.update()
 
 class ShowRobot:
 
