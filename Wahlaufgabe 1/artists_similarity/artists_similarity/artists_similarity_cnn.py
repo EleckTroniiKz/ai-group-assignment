@@ -8,19 +8,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
 import cv2
-import sklearn
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.cluster import DBSCAN
 from sklearn.decomposition import PCA
 from keras.models import Model
 import tensorflow as tf
-#from keras.applications import NASNetLarge
-#from tensorflow.keras.applications import NASNetLarge
-
-
 from os import listdir
 #Dataset: WikiArt
 #Size of large dataset: 34GB(!)
 #Source: https://www.kaggle.com/datasets/steubk/wikiart
+
+# Load the data
 path_img = "wikiart/"
 list_img = [file for file in listdir(path_img)]
 artist = [name.split('_')[0].replace('-','_') for name in list_img]
@@ -42,16 +39,11 @@ image_size = (120, 120)
 image_files = [f for f in os.listdir(path_img) if f.endswith('.jpg') or f.endswith('.png')]
 
 num_images_to_display = 4
-#num_images_to_display = 9
-#num_images_to_display = 36 
 random_images = random.sample(image_files, num_images_to_display)
 
 num_rows = 2
 num_cols = 2
-#num_rows = 3
-#num_cols = 3
-#num_rows = 6 
-#num_cols = 6
+# Plot 4 images from the datasamples randomly
 fig, axes = plt.subplots(num_rows, num_cols, figsize=(12, 12))
 for i, ax in enumerate(axes.flatten()):
     img_path = os.path.join(path_img, random_images[i])
@@ -77,10 +69,6 @@ for i in range(len(list_img)):
         ignored_indices.append(i)
 
 print(f"Ignored indices: {ignored_indices}")
-
-
-# Print an example image array
-print(images[0])
 
 
 #Exploratory data analysis
@@ -116,30 +104,28 @@ df_label.columns=['img']
 df_label['artist']=artist
 df_label.head()
 
-# Get the average colour per paiting
+# Get the average colour per painting
 avg_colours=[]
 for img in list_img:
     colour=get_avg_colour(img)
     avg_colours.append(colour)
 df_label['avg_colours']=avg_colours
 
-df_label.head()
 
-
+# Method to turn hex colour codes to RGB
 def hex_to_rgb(hex_code):
     hex_code = hex_code.lstrip('#')
     return tuple(int(hex_code[i:i+2], 16) for i in (0, 2, 4))
 
+# Method to turn RGB to hex colour codes
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % tuple(rgb)
 
+# Calculate the average colour per artist
 average_colour_per_artist = df_label.groupby('artist')['avg_colours'].apply(
     lambda x: rgb_to_hex(np.round(np.mean([hex_to_rgb(hex_code) for hex_code in x], axis=0)).astype(int))
 )
 average_colour_per_artist = average_colour_per_artist.to_frame().reset_index()
-average_colour_per_artist.head()
-
-
 
 # A plot with 4 rows a 5 columns
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -158,7 +144,7 @@ for index, row in average_colour_per_artist.iterrows():
     row_index = index // num_columns
     col_index = index % num_columns
     
-    # Create rectangular shapes filled with ghe calculated colour
+    # Create rectangular shapes filled with the average colour per artist
     rect_x = col_index * rect_width
     rect_y = row_index * rect_height
     rect = plt.Rectangle((rect_x, rect_y), rect_width, rect_height, facecolor=colour)
@@ -202,6 +188,7 @@ wikiart_model = tf.keras.applications.NASNetLarge(
 )
 model = Model(inputs=wikiart_model.inputs, outputs=wikiart_model.layers[-1].output)
 
+# extract features of the images
 features = []
 for i in range(len(list_img)-len(ignored_indices)):
     if i%100 == 0 : print(i)
@@ -213,19 +200,16 @@ for i in range(len(list_img)-len(ignored_indices)):
 
 features_cnn = np.concatenate(features, axis=0)
 features_cnn_flat = features_cnn.reshape(features_cnn.shape[0], -1)
-print(features_cnn_flat.shape)
-
 
 df_features=pd.DataFrame(features_cnn_flat)
 df=pd.concat([df_label,df_features],axis=1)
-df.head()
 
 df_grp = df.groupby('artist').mean()
 
+# Initialize Primary Component Analysis
 pca=PCA(n_components=0.99)
 pca.fit(df_grp)
 df_pca = pca.transform(df_grp)
-#df_pca = pd.DataFrame(df_pca, index=df_grp.index)
 df_pca = pd.DataFrame(df_pca, index=df_grp.index)
 
 print(f"Size of feature before PCA : {features_cnn_flat.shape[0]}")
@@ -240,9 +224,7 @@ df_pca_transformed_back = df_pca_transformed.T
 df_pca = df_pca_transformed_back
 
 artist_names = df_grp.index.tolist()
-#artist_names = df_pca['artist'].tolist()
 pcs = df_pca.values
-#pcs = df_pca.drop('artist', axis=1).values
 
 # Plotting the first two principal components
 plt.figure(figsize=(12, 10))
@@ -262,9 +244,6 @@ plt.yticks([])
 plt.box(None)
 plt.tight_layout()
 plt.show()
-
-
-
 plt.figure(figsize=(8, 6))
 plt.scatter(pcs[:, 0], pcs[:, 1], s=30,  alpha=0.8, color='royalblue',edgecolor='black', linewidth=0.5)
 
