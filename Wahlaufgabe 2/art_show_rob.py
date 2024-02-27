@@ -357,12 +357,14 @@ class ShowRobot:
         """
         exit_state = 20
 
+        current_reward_matrix_dataframe = current_reward_matrix_dataframe.values.tolist()
+
         # Phase 1
         if current_phase_number == 1:  # Walk until EXIT or time expires and than print out the explored (probably bad path)
             state_after_action = current_state_number
             
             if current_timestep == 100:
-                return current_timestep, 2, 12, current_reward_matrix_dataframe
+                return current_timestep, 2, 12, pd.DataFrame(current_reward_matrix_dataframe)
 
             current_timestep += 1
             possible_actions = ["L", "R", "U", "D"]
@@ -373,15 +375,15 @@ class ShowRobot:
             state_after_action = self.state_table[current_state_number][random_action]
 
             if state_after_action == exit_state:
-                return current_timestep, 2, 12, current_reward_matrix_dataframe
-            return current_timestep, 1, state_after_action, current_reward_matrix_dataframe
+                return current_timestep, 2, 12, pd.DataFrame(current_reward_matrix_dataframe)
+            return current_timestep, 1, state_after_action, pd.DataFrame(current_reward_matrix_dataframe)
 
         # Phase 2
         elif current_phase_number == 2:
             current_timestep += 1
             tasks = self.count_service_tasks(current_reward_matrix_dataframe)
             if len(tasks) == 0:
-                return 0, 3, 12, current_reward_matrix_dataframe
+                return 0, 3, 12, pd.DataFrame(current_reward_matrix_dataframe)
 
             best_action, best_reward = self.get_next_best_action(current_state_number)
             while not self.is_action_valid(current_state_number, best_action):
@@ -391,7 +393,7 @@ class ShowRobot:
             current_reward_matrix_dataframe = self.remove_reward_from_matrix(current_state_number)
             self.q_table, self.state_table = self.create_q_table_and_state_table(current_reward_matrix_dataframe)
                 
-            return current_timestep, 2, new_state_number, current_reward_matrix_dataframe
+            return current_timestep, 2, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
                 
         # Phase 3
         else:
@@ -404,8 +406,8 @@ class ShowRobot:
             current_reward_matrix_dataframe = self.remove_reward_from_matrix(current_state_number)
             self.q_table, self.state_table = self.create_q_table_and_state_table(current_reward_matrix_dataframe)
             if current_timestep > 33:
-                return -1, 3, new_state_number, current_reward_matrix_dataframe
-            return current_timestep, 3, new_state_number, current_reward_matrix_dataframe
+                return -1, 3, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
+            return current_timestep, 3, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
             
 showRobot = ShowRobot()
 path = [12]
@@ -415,18 +417,19 @@ timestep = 0
 state = 12
 
 firstPhaseCompleted, secondPhaseCompleted = False, False
+reward_matrix = pd.DataFrame(showRobot.reward_matrix)
 
 while True:
-    timestep, current_phase, state, showRobot.reward_matrix = showRobot.optimal_strategy_function(timestep, current_phase, state, showRobot.reward_matrix)
+    timestep, current_phase, state, reward_matrix = showRobot.optimal_strategy_function(timestep, current_phase, state, reward_matrix)
     path.append(state)
     if current_phase == 2 and not firstPhaseCompleted:
         firstPhaseCompleted = True
-        paths.append(path)
-        path = []
+        paths.append(path[:-1])
+        path = [path[-1]]
     elif current_phase == 3 and not secondPhaseCompleted:
         secondPhaseCompleted = True
-        paths.append(path)
-        path = []
+        paths.append(path[:-1])
+        path = [path[-1]]
     if (current_phase == 3 and timestep == -1):	
         paths.append(path)
         break
