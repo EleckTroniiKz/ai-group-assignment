@@ -12,10 +12,6 @@ class Action(Enum):
     LEFT = "L"
     RIGHT = "R"
 
-"""
-"C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png"
-"C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png"
-"""
 
 class ShowRobotPlot:
 
@@ -98,21 +94,24 @@ class ShowRobotPlot:
         text = font.render("Moves: " + str(currentStateID) + " / " + str(len(currentPathList)-1), True, (255, 0, 0))
         self.screen.blit(text, textRect)
 
-    def plot(self, path):
+    def plot(self, path, title):
         self.floor = pygame.transform.scale(self.floor, (1250, 500))
         self.robot = pygame.transform.scale(self.robot, (50, 50))
 
         self.screen.blit(self.floor, (0, 0))
         self.screen.blit(self.robot, self.get_plot_position(12))
         
-
+        self.running = True
         stateID = 0
+        
 
         font = pygame.font.Font(None, 36)
         text = font.render("Moves: " + str(stateID) + " / " + str(len(path)-1), True, (255, 0, 0))
         textRect = text.get_rect()
         self.screen.blit(text, textRect)
-        print(path)
+        
+        pygame.display.set_caption(title)
+
         while self.running:
             for i in pygame.event.get():
                 if i.type == pygame.QUIT:
@@ -266,8 +265,6 @@ class ShowRobot:
             best_action = self.create_random_action()
             while not self.is_action_valid(current_state_number, best_action):
                 best_action = self.create_random_action()
-        if best_action == None:
-            print("Yo")
         return best_action, best_reward
 
     def get_next_best_action_with_depth(self, current_state_number, depth):
@@ -364,8 +361,8 @@ class ShowRobot:
         if current_phase_number == 1:  # Walk until EXIT or time expires and than print out the explored (probably bad path)
             state_after_action = current_state_number
             
-            if current_timestep == 10:
-                return current_timestep, 2, current_state_number, current_reward_matrix_dataframe
+            if current_timestep == 100:
+                return current_timestep, 2, 12, current_reward_matrix_dataframe
 
             current_timestep += 1
             possible_actions = ["L", "R", "U", "D"]
@@ -375,7 +372,7 @@ class ShowRobot:
                 random_action = self.create_random_action(possible_actions)
             state_after_action = self.state_table[current_state_number][random_action]
 
-            if current_state_number == exit_state:
+            if state_after_action == exit_state:
                 return current_timestep, 2, 12, current_reward_matrix_dataframe
             return current_timestep, 1, state_after_action, current_reward_matrix_dataframe
 
@@ -384,7 +381,7 @@ class ShowRobot:
             current_timestep += 1
             tasks = self.count_service_tasks(current_reward_matrix_dataframe)
             if len(tasks) == 0:
-                return 0, 3, current_state_number, current_reward_matrix_dataframe
+                return 0, 3, 12, current_reward_matrix_dataframe
 
             best_action, best_reward = self.get_next_best_action(current_state_number)
             while not self.is_action_valid(current_state_number, best_action):
@@ -401,15 +398,15 @@ class ShowRobot:
             current_timestep += 1
             self.create_random_service_task()
             best_action, best_reward = self.get_next_best_action(current_state_number)
-            if self.is_action_valid(current_state_number, best_action):
-                new_state_number = self.state_table[current_state_number][best_action]
-                current_reward_matrix_dataframe = self.remove_reward_from_matrix(current_state_number)
-                self.q_table, self.state_table = self.create_q_table_and_state_table(current_reward_matrix_dataframe)
-            if current_timestep > 25:
-                return 0, 1, current_state_number, current_reward_matrix_dataframe
-            return current_timestep, 3, current_state_number, current_reward_matrix_dataframe
+            while not self.is_action_valid(current_state_number, best_action):
+                best_action, best_reward = self.get_next_best_action(current_state_number)
+            new_state_number = self.state_table[current_state_number][best_action]
+            current_reward_matrix_dataframe = self.remove_reward_from_matrix(current_state_number)
+            self.q_table, self.state_table = self.create_q_table_and_state_table(current_reward_matrix_dataframe)
+            if current_timestep > 33:
+                return -1, 3, new_state_number, current_reward_matrix_dataframe
+            return current_timestep, 3, new_state_number, current_reward_matrix_dataframe
             
-
 showRobot = ShowRobot()
 path = [12]
 current_phase = 1
@@ -417,31 +414,36 @@ paths= []
 timestep = 0
 state = 12
 
-oneDone = False
-twoDone = False
+firstPhaseCompleted, secondPhaseCompleted = False, False
 
-for i in range(200):
+while True:
     timestep, current_phase, state, showRobot.reward_matrix = showRobot.optimal_strategy_function(timestep, current_phase, state, showRobot.reward_matrix)
     path.append(state)
-    if current_phase == 2 and not oneDone:
-        oneDone = True
-        print("Phase 1 done")
-        print(path)
+    if current_phase == 2 and not firstPhaseCompleted:
+        firstPhaseCompleted = True
+        paths.append(path)
         path = []
-    elif current_phase == 3 and not twoDone:
-        twoDone = True
-        print("Phase 2 done")
-        print(path)
+    elif current_phase == 3 and not secondPhaseCompleted:
+        secondPhaseCompleted = True
+        paths.append(path)
         path = []
+    if (current_phase == 3 and timestep == -1):	
+        paths.append(path)
+        break
     
-    
 
-pass
+plotter = ShowRobotPlot(pathFloorPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png", pathRobotPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
 
+for id, path in enumerate(paths):
+    if len(path) > 1:
+        plotter.plot(path, "Art Show Robot - Phase " + str(id+1))
 
-
-#plotter = ShowRobotPlot(pathFloorPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png", pathRobotPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
-#plotter.plot([path])
+"""
+Controls for the plot:
+Right arrow: next step
+Left arrow: previous step
+ESC: Close the plot
+"""
 
 
 
