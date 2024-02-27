@@ -217,13 +217,12 @@ class ShowRobot:
 
         return q_table, state_table     
 
-    def create_random_action(self):
+    def create_random_action(self, possible_actions = ["L", "R", "U", "D"]):
         """
         :return: Random possible action for robot to execute.
         """
-        possible_action = {1: 'L', 2: 'R', 3: 'U', 4: 'D'}
-        rand_number = randint(1, 4)
-        return possible_action[rand_number]
+        rand_number = randint(0, len(possible_actions)-1)
+        return possible_actions[rand_number]
 
     def is_action_valid(self, current_state_number, action):
         """
@@ -247,7 +246,7 @@ class ShowRobot:
         new_reward_matrix = self.reward_matrix
         for row in new_reward_matrix:
             if row[column_index] != -1:
-                row[column_index] = -1
+                row[column_index] = 0
         return new_reward_matrix
 
     def get_next_best_action(self, current_state_number):
@@ -267,7 +266,33 @@ class ShowRobot:
             best_action = self.create_random_action()
             while not self.is_action_valid(current_state_number, best_action):
                 best_action = self.create_random_action()
+        if best_action == None:
+            print("Yo")
         return best_action, best_reward
+
+    def get_next_best_action_with_depth(self, current_state_number, depth):
+        if depth == 0:
+            return self.get_next_best_action(current_state_number)
+        
+        bestAction = None
+        bestReqard = float('-inf')
+
+        for action in ["L", "R", "D", "U"]:
+            if not self.is_action_valid(current_state_number, action):
+                continue
+            reward = self.q_table[current_state_number][action]
+
+            if depth > 0:
+                next_state = self.state_table[current_state_number][action]
+                next_action = self.get_next_best_action_with_depth(next_state, depth-1)
+                while not self.is_action_valid(next_state, next_action):
+                    next_action = self.get_next_best_action_with_depth(next_state, depth-1)
+                if next_action is not None:
+                    reward += 0.9 * self.q_table[next_state][next_action]
+            if reward > bestReqard:
+                bestReqard = reward
+                bestAction = action
+        return bestAction
 
     def create_random_service_task(self):
         """
@@ -276,16 +301,11 @@ class ShowRobot:
         """
         rand_number_state = randint(0, 30)
         rand_number_reward = random.choice([1, 5, 10])
-        possible_actions = []
 
-        for key in self.state_table[rand_number_state]:
-            possible_actions.append(key)
-
-        while self.state_table[rand_number_state] != 0:
-            rand_number_state = randint(0, 30)
         
-        for row in possible_actions:
-            self.reward_matrix[row][rand_number_state] = rand_number_reward
+        for row in range(len(self.reward_matrix)):
+            if self.reward_matrix[row][rand_number_state] != -1:
+                self.reward_matrix[row][rand_number_state] = rand_number_reward
         self.q_table, self.state_table = self.create_q_table_and_state_table(self.reward_matrix)
         
     def count_service_tasks(self, reward_matrix):
@@ -294,14 +314,36 @@ class ShowRobot:
         :return: the number of service tasks in the matrix
         """
         count = 0
+        service_tasks = []
 
         for state in self.states:
             for row in reward_matrix:
                 if row[state] > 0:
-                    count += 1
+                    service_tasks.append(state)
                     break
 
-        return count
+        return service_tasks
+
+    def find_path(self, start_state, goal_state):
+        copyQ = self.q_table
+        copyStates = self.state_table
+        visited_states = set()
+        path = []
+
+        def dfs(state):
+            if state == goal_state:
+                return True
+            visited_states.add(state)
+            for action, next_state in copyStates[state].items():
+                if next_state not in visited_states and dfs(next_state):
+                    path.append((state, action))
+                    return True
+            return False
+
+        if dfs(start_state):
+            path.reverse()
+            return path
+        return None
 
     def optimal_strategy_function(self, current_timestep, current_phase_number, current_state_number, current_reward_matrix_dataframe):
         """
@@ -316,39 +358,43 @@ class ShowRobot:
         :param current_reward_matrix_dataframe: 31x31 Matrix
         :return: the optimal strategy path as an array [0....30] the initial steps
         """
-        #self.reward_matrix = current_reward_matrix_dataframe.to_numpy()
         exit_state = 20
 
         # Phase 1
         if current_phase_number == 1:  # Walk until EXIT or time expires and than print out the explored (probably bad path)
-            if current_timestep < 100:
-                current_timestep += 1
-                random_action = self.create_random_action()
-                while not self.is_action_valid(current_state_number, random_action):
-                    random_action = self.create_random_action()
-                state_after_action = self.state_table[current_state_number][random_action]
+            state_after_action = current_state_number
+            
+            if current_timestep == 10:
+                return current_timestep, 2, current_state_number, current_reward_matrix_dataframe
 
-                if current_state_number == exit_state:
-                    return current_timestep, 1, state_after_action, self.reward_matrix
-            return current_timestep, 2, current_state_number, self.reward_matrix
-            
-            
+            current_timestep += 1
+            possible_actions = ["L", "R", "U", "D"]
+            random_action = self.create_random_action()
+            while not self.is_action_valid(current_state_number, random_action):
+                possible_actions.remove(random_action)
+                random_action = self.create_random_action(possible_actions)
+            state_after_action = self.state_table[current_state_number][random_action]
+
+            if current_state_number == exit_state:
+                return current_timestep, 2, 12, current_reward_matrix_dataframe
+            return current_timestep, 1, state_after_action, current_reward_matrix_dataframe
 
         # Phase 2
         elif current_phase_number == 2:
             current_timestep += 1
-            best_action, best_reward = self.get_best_action_from_q_table(new_state_number)
+            tasks = self.count_service_tasks(current_reward_matrix_dataframe)
+            if len(tasks) == 0:
+                return 0, 3, current_state_number, current_reward_matrix_dataframe
 
-            if self.is_action_valid(new_state_number, best_action):
-                old_state = new_state_number
-                new_state_number = self.state_table[new_state_number][best_action]
-                new_reward_matrix = self.remove_reward_from_matrix(old_state)
-                self.q_table, self.state_table = self.create_q_table_and_state_table(new_reward_matrix)
+            best_action, best_reward = self.get_next_best_action(current_state_number)
+            while not self.is_action_valid(current_state_number, best_action):
+                best_action, best_reward = self.get_next_best_action(current_state_number)
 
-            # go to new service state, when there are no service_tasks left
-            if self.count_service_tasks(new_reward_matrix) == 0:
-                return 0, 3, current_state_number, self.reward_matrix
-            return current_timestep, 2, current_state_number, self.reward_matrix
+            new_state_number = self.state_table[current_state_number][best_action]
+            current_reward_matrix_dataframe = self.remove_reward_from_matrix(current_state_number)
+            self.q_table, self.state_table = self.create_q_table_and_state_table(current_reward_matrix_dataframe)
+                
+            return current_timestep, 2, new_state_number, current_reward_matrix_dataframe
                 
         # Phase 3
         else:
@@ -357,22 +403,45 @@ class ShowRobot:
             best_action, best_reward = self.get_next_best_action(current_state_number)
             if self.is_action_valid(current_state_number, best_action):
                 new_state_number = self.state_table[current_state_number][best_action]
-                new_reward_matrix = self.remove_reward_from_matrix(current_state_number)
-                self.q_table, self.state_table = self.create_q_table_and_state_table(new_reward_matrix)
+                current_reward_matrix_dataframe = self.remove_reward_from_matrix(current_state_number)
+                self.q_table, self.state_table = self.create_q_table_and_state_table(current_reward_matrix_dataframe)
             if current_timestep > 25:
-                return 0, 1, current_state_number, self.reward_matrix
-            return current_timestep, 3, current_state_number, self.reward_matrix
+                return 0, 1, current_state_number, current_reward_matrix_dataframe
+            return current_timestep, 3, current_state_number, current_reward_matrix_dataframe
             
 
 showRobot = ShowRobot()
 path = [12]
+current_phase = 1
+paths= []
+timestep = 0
+state = 12
+
+oneDone = False
+twoDone = False
 
 for i in range(200):
-    timestep, phase, state, reward_matrix = showRobot.optimal_strategy_function(0, 1, 12, showRobot.reward_matrix)
+    timestep, current_phase, state, showRobot.reward_matrix = showRobot.optimal_strategy_function(timestep, current_phase, state, showRobot.reward_matrix)
     path.append(state)
+    if current_phase == 2 and not oneDone:
+        oneDone = True
+        print("Phase 1 done")
+        print(path)
+        path = []
+    elif current_phase == 3 and not twoDone:
+        twoDone = True
+        print("Phase 2 done")
+        print(path)
+        path = []
+    
+    
 
-plotter = ShowRobotPlot(pathFloorPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png", pathRobotPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
-plotter.plot([path])
+pass
+
+
+
+#plotter = ShowRobotPlot(pathFloorPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png", pathRobotPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
+#plotter.plot([path])
 
 
 
