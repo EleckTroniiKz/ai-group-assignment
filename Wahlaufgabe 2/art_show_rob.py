@@ -129,13 +129,13 @@ class ShowRobotPlot:
 
 class ShowRobot:
 
-    def __init__(self):
-        self.reward_matrix = self.read_xslx_into_two_dimensional_list()
+    def __init__(self, filePath):
+        self.reward_matrix = self.read_xslx_into_two_dimensional_list(filePath)
         self.q_table, self.state_table = self.create_q_table_and_state_table(self.reward_matrix)
         self.paths = []
         self.states = [x for x in range(31)]
     
-    def read_xslx_into_two_dimensional_list(self, file_path="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Reward_Matrix_Show_Snapshot.xlsx"):
+    def read_xslx_into_two_dimensional_list(self, file_path=""):
         result = []
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
@@ -409,7 +409,7 @@ class ShowRobot:
                 return -1, 3, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
             return current_timestep, 3, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
             
-showRobot = ShowRobot()
+showRobot = ShowRobot(filePath="./Reward_Matrix_Show_Snapshot.xslx")
 path = [12]
 current_phase = 1
 paths= []
@@ -435,7 +435,7 @@ while True:
         break
     
 
-plotter = ShowRobotPlot(pathFloorPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\Messe.png", pathRobotPicture="C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-assignment\\Wahlaufgabe 2\\robot.png")
+plotter = ShowRobotPlot(pathFloorPicture="./Messe.png", pathRobotPicture="./robot.png")
 
 for id, path in enumerate(paths):
     if len(path) > 1:
