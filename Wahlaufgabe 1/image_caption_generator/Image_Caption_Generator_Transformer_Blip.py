@@ -20,7 +20,6 @@ image_filenames = os.listdir(image_dir)
 batch_size = 2  # Define the batch size
 outputs = []
 
-# Measure total time
 start_time = time.time()
 
 # Iterate over images in batches
@@ -45,14 +44,10 @@ for i in range(0, len(image_filenames), batch_size):
     captions = [processor.decode(output, skip_special_tokens=True) for output in out]
     outputs.extend(captions)
 
-# Calculate total time taken
 total_time = time.time() - start_time
 
-# Create a DataFrame with the results
 results_df = pd.DataFrame({"Image Filename": image_filenames, "Caption": outputs})
 
-# Save the DataFrame to a CSV file
 results_df.to_csv("result.csv", index=False)
 
-# Print the total time
 print(f"Total time taken for processing {len(image_filenames)} images: {total_time:.2f} seconds")

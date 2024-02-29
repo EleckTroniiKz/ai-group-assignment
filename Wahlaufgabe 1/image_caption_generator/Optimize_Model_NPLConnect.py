@@ -1,5 +1,4 @@
 import os
-import time
 import pandas as pd
 from PIL import Image
 from transformers import VisionEncoderDecoderModel, ViTImageProcessor, AutoTokenizer

@@ -45,7 +45,6 @@ with torch.no_grad():
         print(f"Image: {image_paths[idx]}, Caption: {preds}")
         print(f"Time taken for processing: {processing_time:.2f} seconds")
 
-# Save results to CSV
 results_df = pd.DataFrame(results)
 results_df.to_csv("results.csv", index=False)
 print("Results saved to nlp_connect_result.csv")

@@ -46,19 +46,10 @@ def createModell(batch_size, max_length, num_beams, temperature):
         captions = [processor.decode(output, skip_special_tokens=True) for output in out]
         outputs.extend(captions)
 
-    # Calculate total time taken
     total_time = time.time() - start_time
-
-    # Create a DataFrame with the results
     results_df = pd.DataFrame({"Image Filename": image_filenames, "Caption": outputs})
-
-    # Save the DataFrame to a CSV file
     results_df.to_csv("result.csv", index=False)
-
-    # Print the total time
     print(f"Total time taken for processing {len(image_filenames)} images: {total_time:.2f} seconds")
-
-    # Calculate total time taken
     total_time = time.time() - start_time
 
     # Initialize the Tf-idf vectorizer and apply it to the captions
@@ -70,11 +61,7 @@ def createModell(batch_size, max_length, num_beams, temperature):
 
     # Create a DataFrame for the Tf-idf matrix
     tfidf_df = pd.DataFrame(tfidf_matrix.toarray(), columns=feature_names)
-
-    # Save the Tf-idf matrix to a CSV file
     tfidf_df.to_csv(f"tfidf_matrix_{batch_size}_{max_length}_{num_beams}_{temperature}.csv", index=False)
-
-    # Print the total time
     print(
         f"Total time taken for processing {len(image_filenames)} images with batch_size={batch_size}, max_length={max_length}, num_beams={num_beams}, temperature={temperature}: {total_time:.2f} seconds")
 

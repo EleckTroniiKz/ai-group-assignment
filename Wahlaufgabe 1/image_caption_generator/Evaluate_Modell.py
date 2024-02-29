@@ -14,7 +14,6 @@ nlp_connect_results = pd.read_csv("nlp_connect_result.csv")
 # Initialize an empty DataFrame to store the comparison results
 comparison_results = pd.DataFrame(columns=['pictureid', 'actualdescription', 'blip_similarity', 'nlp_connect_similarity'])
 
-# Initialize a TfidfVectorizer with English stop words
 vectorizer = TfidfVectorizer(stop_words='english')
 
 # Combine all captions for BLIP and nlp_connect_result models for vectorization
@@ -36,7 +35,6 @@ nlp_connect_similarities = cosine_similarity(test_dataset_tfidf, nlp_connect_tfi
 blip_average_similarity = blip_similarities.mean()
 nlp_connect_average_similarity = nlp_connect_similarities.mean()
 
-# Print the average similarity for each model
 print("Average Similarity for BLIP Model:", blip_average_similarity)
 print("Average Similarity for nlp_connect_result Model:", nlp_connect_average_similarity)
 
@@ -50,8 +48,6 @@ for idx, row in test_dataset.iterrows():
         {'pictureid': picture_id, 'actualdescription': actual_description, 'blip_similarity': blip_similarity,
          'nlp_connect_similarity': nlp_connect_similarity}, index=[0])
     comparison_results = pd.concat([comparison_results, new_row], ignore_index=True)
-# Display the comparison results DataFrame
-print(comparison_results)
 
 # Save the comparison results DataFrame to a CSV file
 comparison_results.to_csv("comparison_results_tfidf_with_stopwords.csv", index=False)
