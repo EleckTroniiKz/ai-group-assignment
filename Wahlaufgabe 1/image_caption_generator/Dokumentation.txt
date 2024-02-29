@@ -1,0 +1,8 @@
+Wir haben versucht das für uns beste passnede Modell zu finden.
+Dafür haben wir uns die Modelle nlpconnect/vit-gpt2-image-captioning und Salesforce/blip-image-captioning-large angesehen.
+Wir haben einen gelabelten Satz an Daten, ein zufälliger Ausschnitt aus dem flickr 8k dataset verwendet um die Leistung der Modelle zu vergleichen.
+Dafür haben beiden Modellen die gleichen Bilder mit Captions versehen und es wurde mit Hilfe der Term Frequency Inverse Document Frequency die Ähnlichkeit der Captions bewertet.
+Beide Modelle haben in etwas gleich gut abgeschlossen. Deshalb haben für beide Modelle eine Optimierung veranlasst.
+Die Dauer für die Optimierung für das Blip Model hat zu lange gedauert, da ein Model über 10 Minuten gebraucht hat. IN einer Praxis umgebung kann mit Cuda das ganze beschleunigt werden.
+Nach der Optimierung des Blip Model soll die Cosinus Simularity von allen verschiedenen Modellen verglichen werden um das beste Model zu ermitteln.
+Auf Grund der fehlenden Rechenpower haben wir das Standard Model von Blip genommen um zwischen Ergebnisse zu generieren (result.csv).
