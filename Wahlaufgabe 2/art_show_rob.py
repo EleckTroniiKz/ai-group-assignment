@@ -448,7 +448,13 @@ Left arrow: previous step
 ESC: Close the plot
 """
 
-
+"""
+    Beurteilen Sie, inwiefern der Einsatz von Dataset Aggregation zur Effizienzsteigerung Ihres Roboters bei einer realen Kunstmesse beitragen kann.
+    Dataset Aggregation allows us to combine Data from different sources to train the model. In the case how we learned it in class, it is by "demonstrating" to the robot. And then iteratively letting the robot try, and find out how to maximize his reward during the process.
+    DAgger can help to reduce overfitting, because we have more Data available. In this case the people's input. And also in the context of the art gallery, it can help to make the robot more dynamic and flexible. It can learn from the people's input and adapt to the environment, even when the layout changes. 
+    
+    So all in all, can the robot learn from the people's input and its already existing knowledge, and be more efficient with those, and prevent overfitting. 
+"""
 
     
 
