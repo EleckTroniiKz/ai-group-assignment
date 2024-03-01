@@ -24,6 +24,9 @@ class ShowRobotPlot:
         self.robot = pygame.image.load(pathRobotPicture)
     
     def get_plot_position(self, state):
+        """
+         We defined positions for each state so the plotting is easier :)
+        """
         if state == 0:
             return (200,25)
         elif state == 1:
@@ -136,6 +139,10 @@ class ShowRobot:
         self.states = [x for x in range(31)]
     
     def read_xslx_into_two_dimensional_list(self, file_path=""):
+        """
+        Reads the xlsx file into a two dimensional list.
+        :param file_path: The path to the xlsx file
+        """
         result = []
         workbook = openpyxl.load_workbook(file_path)
         sheet = workbook.active
@@ -145,6 +152,11 @@ class ShowRobot:
         return result
 
     def create_q_table_and_state_table(self, reward_matrix):
+        """
+            Reads the matrix into two dictionaries. Every dictionary will then receive two parameters. One the current state and then an Action (U, R, L, D)
+            The q_table will return the reward, that would be received when executing the action on the current state.
+            The state_Table will return the next state, that would be reached when executing the action on the current state.
+        """
         dict = {}
 
         for i, inner_list in enumerate(reward_matrix):
@@ -218,6 +230,8 @@ class ShowRobot:
 
     def create_random_action(self, possible_actions = ["L", "R", "U", "D"]):
         """
+        Create random action. If the action is not valid, the method will be called again until a valid action is found.
+        The maximum times of this method being called after another is 4 times.
         :return: Random possible action for robot to execute.
         """
         rand_number = randint(0, len(possible_actions)-1)
@@ -225,7 +239,7 @@ class ShowRobot:
 
     def is_action_valid(self, current_state_number, action):
         """
-        Validates the next move of the roboter.
+        Checks if the generated action is valid, meaning, can i do that move from current state?    
         :param current_state_number: Integer from [0 , ... , 30]
         :param action: String
         :return: boolean (Is action valid -> true, is action invalid -> false
@@ -237,6 +251,8 @@ class ShowRobot:
 
     def remove_reward_from_matrix(self, state):
         """
+        When going over a state, the reward for that state should be removed. (Task 2 and 3)
+        BUT we set it on 0, because the robot would sometimes get stuck in a corner, and we want to avoid that.
         :param reward_matrix: The given xlsx reward matrix
         :param action: The action the robot executes
         :return: new_reward_matrix -> Updated xlsx with the new rewards
@@ -250,6 +266,7 @@ class ShowRobot:
 
     def get_next_best_action(self, current_state_number):
         """
+        Look greedily for the NEXT best action with a depth of 1
         :param current_state_number: The current state of the robot.
         :return: the maximum reward possible for the robot (greedy method).
         """
@@ -268,6 +285,10 @@ class ShowRobot:
         return best_action, best_reward
 
     def get_next_best_action_with_depth(self, current_state_number, depth):
+        """
+            This method is conceptual, it didn't work how we wanted it to. 
+            It is supposed to look for the next best action with a given depth recursively
+        """
         if depth == 0:
             return self.get_next_best_action(current_state_number)
         
@@ -307,6 +328,7 @@ class ShowRobot:
         
     def count_service_tasks(self, reward_matrix):
         """
+        Return the amount of service tasks left on the board (helpful for phase 2)
         :param reward_matrix: The given xlsx reward matrix
         :return: the number of service tasks in the matrix
         """
@@ -322,6 +344,11 @@ class ShowRobot:
         return service_tasks
 
     def find_path(self, start_state, goal_state):
+        """
+        Not used method, which was conceptual. The thought was for phase 2, to find the best path from one service task to another. 
+        So this executes a depth first search to find the path and walk it. But this wouldn't be q-learning really. 
+        Was still very fun to work on tho!
+        """
         copyQ = self.q_table
         copyStates = self.state_table
         visited_states = set()
