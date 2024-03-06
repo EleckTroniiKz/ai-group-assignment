@@ -408,3 +408,4 @@ absolute_path = "C:\\Users\\Can\\Documents\\Programming\\ai-project\\ai-group-as
 
 A = ArtKnowledgeGraph(absolute_path, isPDF=False, topic= "Art Basel Fair")
 A.process("I")
+

@@ -1,4 +1,4 @@
-    [
+[
     {
     "_id": "66",
     "corrected_question": "Is the Mona Lisa housed in the Louvre Museum?",
@@ -85,16 +85,16 @@
     },
     {
         "_id": "231",
-        "corrected_question": "What is the area of Lake Superior?",
-        "intermediary_question": "Provide the measurement of <area> for <Lake Superior>.",
-        "sparql_query": "SELECT DISTINCT ?area WHERE { <http://dbpedia.org/resource/Lake_Superior> <http://dbpedia.org/property/areaTotal> ?area . }",
-        "sparql_template_id": 102
-    },
-    {
-        "_id": "232",
         "corrected_question": "How many Grammy Awards has Beyoncé won?",
         "intermediary_question": "Count the number of <Grammy Awards> won by <Beyoncé>.",
         "sparql_query": "SELECT DISTINCT COUNT(?award) WHERE { <http://dbpedia.org/resource/Beyoncé> <http://dbpedia.org/property/grammyAwards> ?award . }",
+        "sparql_template_id": 102
+    },
+    {
+        "_id": "231",
+        "corrected_question": "What is the area of Lake Superior?",
+        "intermediary_question": "Provide the measurement of <area> for <Lake Superior>.",
+        "sparql_query": "SELECT DISTINCT ?area WHERE { <http://dbpedia.org/resource/Lake_Superior> <http://dbpedia.org/property/areaTotal> ?area . }",
         "sparql_template_id": 102
     },
     {

@@ -436,7 +436,7 @@ class ShowRobot:
                 return -1, 3, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
             return current_timestep, 3, new_state_number, pd.DataFrame(current_reward_matrix_dataframe)
             
-showRobot = ShowRobot(filePath="./Reward_Matrix_Show_Snapshot.xslx")
+showRobot = ShowRobot(filePath="./Reward_Matrix_Show_Snapshot.xlsx")
 path = [12]
 current_phase = 1
 paths= []
@@ -464,6 +464,9 @@ while True:
 
 plotter = ShowRobotPlot(pathFloorPicture="./Messe.png", pathRobotPicture="./robot.png")
 
+path = [12, 7, 0, 1, 8, 14, 21, 25, 24, 25, 21, 14, 15, 16, 22, 27, 28, 29, 30, 11, 6, 11, 20]
+plotter.plot(path, "A ideal one")
+pass
 for id, path in enumerate(paths):
     if len(path) > 1:
         plotter.plot(path, "Art Show Robot - Phase " + str(id+1))
@@ -482,6 +485,3 @@ ESC: Close the plot
     
     So all in all, can the robot learn from the people's input and its already existing knowledge, and be more efficient with those, and prevent overfitting. 
 """
-
-    
-
